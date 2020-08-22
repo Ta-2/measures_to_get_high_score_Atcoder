@@ -5,6 +5,8 @@ using namespace std;
 //ビットの制御についてフィルターを考える
 int main(){
   int n = 3;
+  //ビットフィールドを追加
+  int filter = 0;
 
   for(int bit = 0; bit < (1<<n); bit++){
     vector<int> S;
