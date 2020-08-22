@@ -2,6 +2,7 @@
 #include <vector>
 using namespace std;
 
+//ビットの制御についてフィルターを考える
 int main(){
   int n = 3;
 
