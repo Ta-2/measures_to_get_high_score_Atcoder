@@ -19,7 +19,7 @@ int main(){
     for(int i = 0; i < n; ++i){ //組み合わせをSにpush_backしていく
       bitset<n> check(1); //比較用に1をbitsetを用意する
       if((now_bit & (check<<i)).count()){
-        S.push_back(i)  //要素をpush_backしていく;
+        S.push_back(i);  //要素をpush_backしていく
       }
     }
 
