@@ -11,13 +11,13 @@ int main(){
   const unsigned int v = search_v;  //1要素の持つbit数
   const unsigned int r = (1<<v) - lim; //探索が必要ない部分の階数
 
-  cout << "v: " << v << ", r: " << r << endl;
+  //cout << "v: " << v << ", r: " << r << endl;
   int mask = 0; //マスクを宣言
   int count[n] = {}; //カウント用変数を用意
   for(unsigned int i = 0; i < v; i++)mask += (1<<i); //マスクを生成
-  cout << "mask: " << bitset<n>(mask) << endl;
+  //cout << "mask: " << bitset<n>(mask) << endl;
 
-  for(unsigned int bit = 0; bit < (unsigned)1<<v*n; bit++){  //全走破するためのbit
+  for(unsigned long long int bit = 0; bit < (unsigned)1<<v*n; bit++){  //全走破するためのbit
     for(int i = 0; i < n; i++){
       if(count[i] == lim){ //bitで探索する必要の無い部分をスキップする
         count[i] = 0;
@@ -25,7 +25,7 @@ int main(){
         bit += r<<(i*v);
       }
     }
-    cout << "bit: " << bitset<12>(bit) << endl;
+    //cout << "bit: " << bitset<12>(bit) << endl;
 
     vector<int> S; //全ての組み合わせを格納する
     for(int i = 0; i < n; i++){
@@ -33,7 +33,7 @@ int main(){
       for(int bit_v = 0; bit_v < lim; bit_v++){
         if((check_bit & mask) == bit_v){
           S.push_back(bit_v);
-          cout << "bit_v: " << bitset<3>(bit_v) << ", check_bit; " << bitset<3>(check_bit) << endl;
+          //cout << "bit_v: " << bitset<3>(bit_v) << ", check_bit; " << bitset<3>(check_bit) << endl;
         }
       }
     }
