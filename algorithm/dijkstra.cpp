@@ -30,7 +30,7 @@ struct edge{
 
 class graph{
 private:
-    vector<vector<edge>> G; //グラフ配列
+    vector<vector<edge>> G; //隣接リスト
                             //G[i] = (j, time) -> 頂点iからjに時間timeで進める
 
 public:
