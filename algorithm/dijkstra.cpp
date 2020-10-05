@@ -37,7 +37,7 @@ public:
     vector<long long> d;    //最短時間の格納
 
 //コンストラクタ
-    graph(long long n);
+    graph(long long n) : G(n), d(n, inf){}
 
 //頂点sから頂点tへの時間timeの辺を張る
     void add_edge(long long _s, long long _to, long long _time);
@@ -45,8 +45,6 @@ public:
 //頂点sから各頂点への最短時間の探索(ダイクストラ法)
     void dijkstra(long long s);
 };
-
-graph::graph(long long n) : G(n), d(n, inf){}
 
 void graph::add_edge(long long _s, long long _to, long long _time){
     edge E;
