@@ -46,13 +46,7 @@ public:
     void dijkstra(long long s);
 };
 
-graph::graph(long long n){
-    G.resize(n);
-    d.resize(n);
-    for(int i = 0; i < n; i++){
-        d[i] = inf;         //Å’ZŽžŠÔ‚ð–³ŒÀ‘å‚Å‰Šú‰»
-    }
-}
+graph::graph(long long n) : G(n), d(n, inf){}
 
 void graph::add_edge(long long _s, long long _to, long long _time){
     edge E;
