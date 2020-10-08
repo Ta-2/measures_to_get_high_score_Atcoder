@@ -17,32 +17,32 @@ using namespace std;
 
 class restaurant{
 public:
-	string city;
-	int score;
-	int num;
+    string city;
+    int score;
+    int num;
 
-	inline bool operator < (const restaurant &other) const{
-		return  (this->city != other.city) ?    //cityが違うかどうか判定
+    inline bool operator < (const restaurant &other) const{
+        return  (this->city != other.city) ?    //cityが違うかどうか判定
                 (this->city  < other.city) :    //違う時、cityを昇順に
                 (this->score > other.score);    //同じ時、scoreを降順に
-	}
+    }
 };
 
 int main(){
-	int n; cin >> n;
+    int n; cin >> n;
     restaurant res[105];
 
-	for(int i = 1; i <= n; ++i){
+    for(int i = 1; i <= n; ++i){
         string s; int p;
-		cin >> s >> p;
+        cin >> s >> p;
         res[i].city = s;
         res[i].score = p;
-		res[i].num = i;
-	}
+        res[i].num = i;
+    }
 
-	sort(res + 1, res + n + 1);     //resは、配列の先頭のイテレータ(正確にはポインタ)を指す
+    sort(res + 1, res + n + 1);     //resは、配列の先頭のイテレータ(正確にはポインタ)を指す
 
-	for(int i = 1; i <= n; ++i){
+    for(int i = 1; i <= n; ++i){
         cout << res[i].num << endl;
     }
 
