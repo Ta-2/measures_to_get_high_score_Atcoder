@@ -1,0 +1,115 @@
+function propagateCheckbox($this) {
+    var checked = $this.is(':checked');
+    $this.parent('li').find('li')
+        .children('input:checkbox').each(function(i, checkbox) {
+            // 自分より下のチェックボックスに伝播する
+            $(checkbox).prop('checked', checked);
+            $(checkbox).prop('indeterminate', false);
+        });
+
+    var $parent = $this.parent('li').parent('ul').parent('li')
+        .children('input:checkbox');
+    var $child = $this;
+
+    var allOf = checked;
+    var noneOf = !allOf;
+    if ($this.is(':indeterminate')) allOf = noneOf = false;
+    while ($parent.length == 1) {
+        $child.parent('li').parent('ul').children('li')
+            .children('input:checkbox').each(function(i, checkbox) {
+                if ($(checkbox).is(':checked')) {
+                    noneOf = false;
+                } else {
+                    allOf = false;
+                }
+                if ($(checkbox).is(':indeterminate')) {
+                    allOf = noneOf = false;
+                }
+            });
+
+        if (allOf) {
+            $parent.prop('checked', true);
+            $parent.prop('indeterminate', false);
+        } else if (noneOf) {
+            $parent.prop('checked', false);
+            $parent.prop('indeterminate', false);
+        } else {            
+            $parent.prop('checked', true);
+            $parent.prop('indeterminate', true);
+        }
+
+        $child = $parent;
+        $parent = $parent.parent('li').parent('ul').parent('li')
+            .children('input:checkbox');
+    }
+}
+
+// $(window).on('load', function() {
+//     $('ul input:checkbox').on('change', function() {
+//         propagateCheckbox($(this));
+        
+//     });
+// })
+
+function initCheckboxList($ul) {
+    var $children = $ul.children('li').children('ul')
+    var $cbox = $ul.parent('li').children('input:checkbox');
+    var status;
+    if ($children.length == 0) {
+        // external
+        var $cbox0 = $ul.find('li>input:checkbox');
+        if ($cbox0.length == $cbox0.filter(':checked').length) {
+            status = 'c';
+        } else if ($cbox0.filter(':checked').length == 0) {
+            status = 'u';
+        } else {
+            status = 'i';
+        }
+    } else {
+        // internal
+        var allOf = true;
+        var noneOf = true;
+        $.each($children, function(i, ul) {
+            // 再帰的にえいえいするので短絡評価はだめです
+            // if (!allOf && !noneOf) return;
+            var st = initCheckboxList($(ul));
+            if (st != 'c') allOf = false;
+            if (st != 'u') noneOf = false;
+        });
+        $.each($ul.children('li').children('input:checkbox'), function(i, cb) {
+            // なんか諸々を統合できそう
+            if ($(cb).prop('checked')) {
+                noneOf = false;
+            } else {
+                allOf = false;
+            }
+        });
+        if (allOf) {
+            status = 'c';
+        } else if (noneOf) {
+            status = 'u';
+        } else {
+            status = 'i';
+        }
+    }
+
+    if ($cbox !== undefined) {
+        $cbox.prop('checked', (status != 'u'));
+        $cbox.prop('indeterminate', (status == 'i'));
+    }
+    return status;
+}
+
+$(function() {
+    var $spt = $('#scroll-page-top');
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 500) {
+            if ($spt.is(':hidden')) $spt.fadeIn();
+        } else {
+            if (!$spt.is(':hidden')) $spt.fadeOut();
+        }
+    });
+    $spt.click(function() {
+        $('html, body').animate({scrollTop: 0}, 200);
+    });
+});

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)http://atcoder-scores.herokuapp.com/ -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="./AtCoder Scores_files/constants.js.ダウンロード"></script>
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AtCoder Scores</title>
+
+    <!-- iOS 用のアイコン．名前が長すぎると省略されるのでつらい -->
+    <link rel="apple-touch-icon" href="http://atcoder-scores.herokuapp.com/apple-touch-icon.png">
+
+    <link href="./AtCoder Scores_files/bootstrap.min.css" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="./AtCoder Scores_files/jquery.min.js.ダウンロード"></script>
+
+    <!-- Bootstrap/JS -->
+    <script src="./AtCoder Scores_files/bootstrap.min.js.ダウンロード"></script>
+
+    <!-- bootstrap-select/CSS/JS -->
+    <link href="./AtCoder Scores_files/bootstrap-select.min.css" rel="stylesheet">
+    <script src="./AtCoder Scores_files/bootstrap-select.min.js.ダウンロード"></script>
+
+    <!-- moment -->
+    <script type="text/javascript" src="./AtCoder Scores_files/moment.js.ダウンロード"></script>
+
+    <!-- purl/JS -->
+    <script src="./AtCoder Scores_files/purl.js.ダウンロード"></script>
+
+    <!-- cookie/JS -->
+    <script src="./AtCoder Scores_files/js.cookie.min.js.ダウンロード"></script>
+
+    <!-- なんで最初からこういうのを用意しておかなかったんですか？ -->
+    <script src="./AtCoder Scores_files/utils.js.ダウンロード"></script>
+
+    <!-- 各種何かしらのことをする JS/CSS -->
+    <script src="./AtCoder Scores_files/base.js.ダウンロード"></script>
+    <link href="./AtCoder Scores_files/base.css" rel="stylesheet">
+
+    <!-- .user-* -->
+    <link href="./AtCoder Scores_files/user.css" rel="stylesheet">
+
+    <!-- フォント関連 -->
+    <link href="./AtCoder Scores_files/css" rel="stylesheet" type="text/css">
+    <link href="./AtCoder Scores_files/css(1)" rel="stylesheet" type="text/css">
+    <link href="./AtCoder Scores_files/font-awesome.min.css" rel="stylesheet">
+
+    <script src="./AtCoder Scores_files/html2canvas.js.ダウンロード"></script>
+    <script src="./AtCoder Scores_files/image.js.ダウンロード"></script>
+    <script src="./AtCoder Scores_files/tasks.js.ダウンロード"></script>  <!-- 前で言う user.js に相当 -->
+    <link href="./AtCoder Scores_files/tasks.css" rel="stylesheet">
+    <link href="./AtCoder Scores_files/table.css" rel="stylesheet">
+    <link href="./AtCoder Scores_files/font-awesome.min.css" rel="stylesheet">
+    <script>
+    userInfo = [];
+    </script>
+  </head>
+
+  <body>
+    <div id="main-div" class="float-container">
+
+      <!-- navigation -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+            <span class="badge mini-badge" style="position: absolute; right: -2px; top: 14px; background-color: #f63a3a; border: 2px solid #333;">2</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a style="color: #fff" class="navbar-brand" href="http://atcoder-scores.herokuapp.com/">AtCoder <strong>Scores</strong></a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="http://atcoder-scores.herokuapp.com/about">このページについて</a></li>
+            <li><a href="http://atcoder-scores.herokuapp.com/contact">お問い合わせ <span class="badge" id="clar-badge">2</span></a></li>
+            <li><a href="http://atcoder-scores.herokuapp.com/graph">精進グラフ</a></li>
+            <li><a href="http://atcoder-scores.herokuapp.com/ui">UI テストページ</a></li>
+          </ul>
+        </div>
+      </nav>
+      <!-- end of navigation -->
+      <div id="main-container" class="container">
+        <div class="page-header">
+          <h1>At<a href="http://atcoder-scores.herokuapp.com/C" target="_blank" id="C">C</a>oder <strong>Scores</strong></h1>
+        </div>
+        <p class="description"><a href="http://beta.atcoder.jp/" target="_blank">AtCoder</a> の（重み付き配点に対応した AGC 001 以降の）問題を点数順に並べる非公式サイトです．</p>
+        <div class="panel panel-info" style="margin-top: 10px">
+          <div class="panel-heading collapse-heading collapsed" data-toggle="collapse" data-target="#collapse-oyasumi" aria-expanded="false">
+
+            <h3 class="panel-title">
+              お知らせ
+              <span class="glyphicon pull-right"></span>
+            </h3>
+          </div>
+
+          <div id="collapse-oyasumi" class="panel-body panel-collapse collapse">
+            <p>諸々が忙しいのでちょっとおやすみします．コンテスト開催ごとの問題追加などは今まで通り行いますが，<a href="http://atcoder-scores.herokuapp.com/updates">機能追加</a> などは 2 月頃までできないと思います．ご了承くださいませ．</p>
+         
+         <p>追記：2 月頃になったのでできるようになりました．のんびりがんばります．よろしくお願いします．</p>
+         
+          </div>
+        </div>
+        <div class="panel panel-default" style="margin-top: 10px">
+          <div class="panel-heading collapse-heading collapsed" data-toggle="collapse" data-target="#collapse-fav" aria-expanded="false">
+
+            <h3 class="panel-title">
+              <img src="./AtCoder Scores_files/fav-yellow.png" width="18px">&nbsp;お気に入り管理&nbsp;<img src="./AtCoder Scores_files/fav-green.png" width="18px">
+              <span class="glyphicon pull-right"></span>
+            </h3>
+          </div>
+
+          <div id="collapse-fav" class="panel-body panel-collapse collapse">
+            <p style="font-weight: bold">この項目の入力内容はローカルに保存されます．</p>
+         <p>ラベル付きお気に入り機能です．自由にラベルをつけて管理できます．以下の <img src="./AtCoder Scores_files/unfav.png" width="14" aria-hidden="true" data-toggle="tooltip" data-trigger="click" title="" data-original-title="ここではありません"> をクリックすることで，別のお気に入りグループをアクティブにすることができます．</p>
+         <p><strong>お気に入りのみ表示</strong> が有効な場合でも，お気に入りを解除した項目は問題リストを再描画するまでは非表示にはなりません．アクティブなお星さまの画像をクリックすると再描画されます．</p>
+         <p class="small">すぐに非表示にして代わりに undo ボタンを表示する手法の方が好ましいですか？</p>
+         <div id="fav-star">
+         <div id="fav-yellow" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-yellow"><img src="./AtCoder Scores_files/fav-yellow.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="yellow" placeholder="例: お気に入り"></div><div id="fav-green" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-green"><img src="./AtCoder Scores_files/unfav.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="green" placeholder="例: 部分点は取れた"></div><div id="fav-cyan" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-cyan"><img src="./AtCoder Scores_files/unfav.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="cyan" placeholder="例: 後で解き直す"></div><div id="fav-blue" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-blue"><img src="./AtCoder Scores_files/unfav.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="blue" placeholder="例: コードゴルフをしたい"></div><div id="fav-purple" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-purple"><img src="./AtCoder Scores_files/unfav.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="purple" placeholder="例: 1ms まで高速化したい"></div><div id="fav-pink" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-pink"><img src="./AtCoder Scores_files/unfav.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="pink" placeholder="例: 他になにか"></div><div id="fav-red" class="input-group mt-1"><span class="input-group-addon fav-color" id="fav-label-red"><img src="./AtCoder Scores_files/unfav.png" width="16" class="fav-preview"></span><input class="form-control fav-label" data-target="red" placeholder="例: ありますか？"></div></div>
+         
+         <label for="fav-only" class="mt-1"><input type="checkbox" id="fav-only" name="fav-only"> お気に入りのみ表示</label>
+         
+          </div>
+        </div>
+
+        <div class="header-form form-group">
+          <div class="panel panel-default" style="margin-top: 10px">
+            <div class="panel-heading collapse-heading" data-toggle="collapse" data-target="#collapse-user" aria-expanded="true">
+
+              <h3 class="panel-title">
+                <span class="glyphicon glyphicon-user"></span>&nbsp;ユーザ指定
+                <span class="glyphicon pull-right"></span>
+              </h3>
+            </div>
+
+            <div id="collapse-user" class="panel-body panel-collapse collapse in">
+              <p class="border">
+             <span>挑戦者</span>
+           </p>
+           <div>
+             <input name="form-username" class="form-control" placeholder="rsk0315">
+           </div>
+           
+           <p class="border">
+             <span>対戦相手</span>
+           </p>
+           <div>
+             <input name="form-rivalnames" class="form-control" placeholder="Tsuta_J, TAB, ...">
+           </div>
+           
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin-top: 10px">
+            <div class="panel-heading collapse-heading" data-toggle="collapse" data-target="#collapse-filter" aria-expanded="true">
+
+              <h3 class="panel-title">
+                <span class="glyphicon glyphicon-filter"></span>&nbsp;フィルタ
+                <span class="glyphicon pull-right"></span>
+              </h3>
+            </div>
+
+            <div id="collapse-filter" class="panel-body panel-collapse collapse in">
+              
+           <!--
+           <label for="xxx"><input id="xxx"> XXX</label>
+           としておくと間の空白もクリッカブルだよーってブログがあったんですが，
+           これって正しいんですか？
+           
+           それ以前の <label> をつけないよくないやり方での親子関係の管理方法との
+           兼ね合いから，
+           <input id="yyy"><label for="yyy">&nbsp;YYY</label>
+           としている箇所があるんですが，なにが好ましいんでしょう
+           -->
+           
+           <span style="font-size: large" class="collapse-heading" data-toggle="collapse" data-target="#filter-with-submissions" aria-expanded="true">
+             <p class="border">
+               <span>提出状況</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <div class="collapse in" id="filter-with-submissions">
+             <p class="small mt-1">複数をチェックした場合，条件に当てはまるもの全てが非表示になります．</p>
+             <ul id="filter-with-ac">
+               <li><label for="user-ac"><input type="checkbox" id="user-ac" name="user-ac"> 自分が <span class="label label-success small">AC</span> していれば非表示</label></li>
+               <li><label for="user-noac"><input type="checkbox" id="user-noac" name="user-noac"> 自分が <span class="label label-success small">AC</span> していなければ非表示</label></li>
+               <li><label for="user-nosub"><input type="checkbox" id="user-nosub" name="user-nosub"> 自分が未提出なら非表示</label></li>
+               <li><label for="none-ac"><input type="checkbox" id="none-ac" name="none-ac"> 誰も <span class="label label-success small">AC</span> していなければ非表示</label></li>
+               <li><label for="all-ac"><input type="checkbox" id="all-ac" name="all-ac"> 誰もが <span class="label label-success small">AC</span> していれば非表示</label></li>
+               <li><label for="any-ac"><input type="checkbox" id="any-ac" name="any-ac"> 誰かが <span class="label label-success small">AC</span> していれば非表示</label></li>
+               <li><label for="any-noac"><input type="checkbox" id="any-noac" name="any-noac"> <span class="label label-success small">AC</span> していない人がいれば非表示</label></li>
+               <hr class="mt-0 mb-1">
+               <li><label for="count"><input type="checkbox" id="count" name="count"> 非表示にした部分も進捗表に加算する</label></li>
+             </ul>
+           </div>
+           
+           <!-- -------------------------------- -->
+           <!-- -------------------------------- -->
+           
+           <span style="font-size: large" class="collapse-heading" data-toggle="collapse" data-target="#filter-with-points" aria-expanded="true">
+             <p class="border">
+               <span>点数</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <div class="collapse in" id="filter-with-points">
+             <div class="form-inline">
+               <div class="btn-group bootstrap-select"><button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" role="button" data-id="point-min" title="0"><span class="filter-option pull-left">0</span>&nbsp;<span class="bs-caret"><span class="caret"></span></span></button><div class="dropdown-menu open" role="combobox"><ul class="dropdown-menu inner" role="listbox" aria-expanded="false"><li data-original-index="0" class="selected"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="true"><span class="text">0</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="1"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">100</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="2"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">200</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">300</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">400</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="5"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">500</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="6"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">600</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="7"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">700</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="8"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">800</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="9"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">900</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="10"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1000</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="11"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1100</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="12"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1200</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="13"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1300</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="14"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1400</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="15"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1500</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="16"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1600</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="17"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1700</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="18"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1800</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="19"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1900</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="20"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2000</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="21"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2100</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="22"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2200</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="23"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2300</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="24"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2400</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="25"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2500</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="26"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2600</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="27"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2700</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="28"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2800</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li></ul></div><select id="point-min" class="selectpicker" data-size="8" tabindex="-98"><option value="0">0</option>
+<option value="100">100</option>
+<option value="200">200</option>
+<option value="300">300</option>
+<option value="400">400</option>
+<option value="500">500</option>
+<option value="600">600</option>
+<option value="700">700</option>
+<option value="800">800</option>
+<option value="900">900</option>
+<option value="1000">1000</option>
+<option value="1100">1100</option>
+<option value="1200">1200</option>
+<option value="1300">1300</option>
+<option value="1400">1400</option>
+<option value="1500">1500</option>
+<option value="1600">1600</option>
+<option value="1700">1700</option>
+<option value="1800">1800</option>
+<option value="1900">1900</option>
+<option value="2000">2000</option>
+<option value="2100">2100</option>
+<option value="2200">2200</option>
+<option value="2300">2300</option>
+<option value="2400">2400</option>
+<option value="2500">2500</option>
+<option value="2600">2600</option>
+<option value="2700">2700</option>
+<option value="2800">2800</option>
+</select></div>
+               から
+               <div class="btn-group bootstrap-select"><button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" role="button" data-id="point-max" title="1000000"><span class="filter-option pull-left">1000000</span>&nbsp;<span class="bs-caret"><span class="caret"></span></span></button><div class="dropdown-menu open" role="combobox"><ul class="dropdown-menu inner" role="listbox" aria-expanded="false"><li data-original-index="0"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">100</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="1"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">200</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="2"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">300</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="3"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">400</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="4"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">500</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="5"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">600</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="6"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">700</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="7"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">800</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="8"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">900</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="9"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1000</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="10"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1100</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="11"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1200</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="12"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1300</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="13"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1400</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="14"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1500</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="15"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1600</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="16"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1700</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="17"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1800</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="18"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">1900</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="19"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2000</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="20"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2100</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="21"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2200</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="22"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2300</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="23"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2400</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="24"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2500</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="25"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2600</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="26"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2700</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="27"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false"><span class="text">2800</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li><li data-original-index="28" class="selected"><a tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="true"><span class="text">1000000</span><span class="glyphicon glyphicon-ok check-mark"></span></a></li></ul></div><select id="point-max" class="selectpicker" data-size="8" tabindex="-98"><option value="100">100</option>
+<option value="200">200</option>
+<option value="300">300</option>
+<option value="400">400</option>
+<option value="500">500</option>
+<option value="600">600</option>
+<option value="700">700</option>
+<option value="800">800</option>
+<option value="900">900</option>
+<option value="1000">1000</option>
+<option value="1100">1100</option>
+<option value="1200">1200</option>
+<option value="1300">1300</option>
+<option value="1400">1400</option>
+<option value="1500">1500</option>
+<option value="1600">1600</option>
+<option value="1700">1700</option>
+<option value="1800">1800</option>
+<option value="1900">1900</option>
+<option value="2000">2000</option>
+<option value="2100">2100</option>
+<option value="2200">2200</option>
+<option value="2300">2300</option>
+<option value="2400">2400</option>
+<option value="2500">2500</option>
+<option value="2600">2600</option>
+<option value="2700">2700</option>
+<option value="2800">2800</option>
+<option value="1000000">1000000</option>
+</select></div>
+             </div>
+           
+             <div class="include-partial" style="margin-top: 10px">
+               <label for="partial" style="margin-top: 10px; font-weight: bold;">部分点</label>
+               <div id="partial">
+                 <label for="include-partial">
+                   <input type="checkbox" id="include-partial" name="include-partial">
+                   部分点が範囲に含まれる問題も表示
+                 </label>
+               </div>
+             </div>
+           </div>
+           
+           <!-- -------------------------------- -->
+           <!-- -------------------------------- -->
+           <!-- -------------------------------- -->
+           <!-- -------------------------------- -->
+           
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin-top: 10px">
+            <div class="panel-heading collapse-heading collapsed" data-toggle="collapse" data-target="#collapse-config" aria-expanded="false">
+
+              <h3 class="panel-title">
+                <span class="glyphicon glyphicon-cog"></span>&nbsp;詳細設定
+                <span class="glyphicon pull-right"></span>
+              </h3>
+            </div>
+
+            <div id="collapse-config" class="panel-body panel-collapse collapse">
+              
+           <span style="font-size: large" class="collapse-heading collapsed" data-toggle="collapse" data-target="#filter-with-date" aria-expanded="false">
+             <p class="border">
+               <span>提出日時</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <div class="collapse" id="filter-with-date">
+             <label for="only-in-contests"><input type="checkbox" id="only-in-contests" name="only-in-contests"> コンテスト中の提出のみを考慮する</label>
+             <p></p>
+             <label for="filter-date" style="font-weight: bold;">期間指定</label>
+             <p>提出日時を <code>YYYY-mm-dd HH:MM:SS</code> の形式指定します．</p>
+             <p>「から」の方は境界を含み，「まで」の方は境界を含みません．また，接頭辞のみが与えられた場合，日付は <code>01</code>，それ以下は <code>00</code> として扱われます．たとえば，<code>2018-01-01 00:00:00</code> は <code>2018</code> と省略可能です．</p>
+             <div class="filter-date">
+               <div class="input-group">
+                 <!-- よくある GUI で日時選択するやつをそのうち追加します -->
+                 <input class="form-control" name="date-from" placeholder="例: 2016-12-03 17:49:23 など">
+                 <span class="input-group-addon">から</span>
+               </div>
+               <div class="input-group">
+                 <input class="form-control" name="date-to" placeholder="例: 2018, 2017-01 など">
+                 <span class="input-group-addon">まで</span>
+               </div>
+             </div>
+           </div>
+           
+           <!-- -------------------------------- -->
+           
+           <span style="font-size: large" class="collapse-heading collapsed" data-toggle="collapse" data-target="#filter-with-categories" aria-expanded="false">
+             <p class="border">
+               <span>コンテスト種別</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <div id="filter-with-categories" class="filters collapse">
+             <div style="margin-top: 5px">
+               <label for="filter-contests" style="font-weight: bold;">コンテスト名</label>
+               <ul id="filter-contests">
+                 <li>
+                   <input type="checkbox">
+                   <span class="collapse-heading collapsed" data-toggle="collapse" data-target="#atcoder-contests" aria-expanded="false">
+                     AtCoder * Contest
+                     <span class="glyphicon pull-right"></span>
+                   </span>
+                   <ul id="atcoder-contests" class="collapse">
+                     <li><input name="show-abc" id="chk-abc" type="checkbox"><label for="chk-abc">&nbsp;Beginner</label></li>
+                     <li><input name="show-arc" id="chk-arc" type="checkbox"><label for="chk-arc">&nbsp;Regular</label></li>
+                     <li><input name="show-agc" id="chk-agc" type="checkbox"><label for="chk-agc">&nbsp;Grand</label></li>
+                     <li><input name="show-apc" id="chk-apc" type="checkbox"><label for="chk-apc">&nbsp;Petrozavodsk</label></li>
+                     <li><input name="show-wtf" id="chk-wtf" type="checkbox"><label for="chk-wtf">&nbsp;World Tour Finals</label></li>
+                     <li><input type="checkbox" id="chk-cs" name="show-cs"><label for="chk-cs">&nbsp;Chokudai SpeedRun</label></li>
+                     <li><input type="checkbox" id="chk-jsutc" name="show-jsutc"><label for="chk-jsutc">&nbsp;Judge System Update Test Contest</label></li>
+                   </ul>
+                 </li>
+                 <li><input type="checkbox">
+                   <span class="collapse-heading collapsed" data-toggle="collapse" data-target="#official-contests" aria-expanded="false">
+                     企業コンテスト
+                     <span class="glyphicon pull-right"></span>
+                   </span>
+                   <ul id="official-contests" class="collapse">
+                     <div style="margin-top:5px; margin-bottom:5px">
+                       <button class="btn btn-sm btn-danger" id="qual-toggle">予選を全て除外</button>&nbsp;
+                       <button class="btn btn-sm btn-danger" id="final-toggle">本戦を全て除外</button>&nbsp;
+                     </div>
+           
+                     <li><input type="checkbox" id="chk-cf-p"><label for="chk-cf-p">&nbsp;CODE FESTIVAL</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-cf-q" name="show-cf-q"><label for="chk-cf-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-cf-f" name="show-cf-f"><label for="chk-cf-f">&nbsp;本戦</label></li>
+                         <li><input type="checkbox" id="chk-cf" name="show-cf"><label for="chk-cf">&nbsp;その他</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-dw-p"><label for="chk-dw-p">&nbsp;ドワンゴからの挑戦状</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-dw-q" name="show-dw-q"><label for="chk-dw-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-dw-f" name="show-dw-f"><label for="chk-dw-f">&nbsp;本戦</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-ya-p"><label for="chk-ya-p">&nbsp;みんなのプロコン</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-ya-q" name="show-ya-q"><label for="chk-ya-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-ya-f" name="show-ya-f"><label for="chk-ya-f">&nbsp;本戦</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-y1-p"><label for="chk-y1-p">&nbsp;天下一プログラマーコンテスト</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-t1-q" name="show-t1-q"><label for="chk-t1-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-t1-f" name="show-t1-f"><label for="chk-t1-f">&nbsp;本戦</label></li>
+                         <li><input type="checkbox" id="chk-t1" name="show-t1"><label for="chk-t1">&nbsp;その他</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-dd-p"><label for="chk-dd-p">&nbsp;DDCC</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-dd-q" name="show-dd-q"><label for="chk-dd-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-dd-f" name="show-dd-f"><label for="chk-dd-f">&nbsp;本戦</label></li>
+                       </ul>                            
+                     </li>
+                     <li><input type="checkbox" id="chk-cl-p"><label for="chk-cl-p">&nbsp;COLOCON</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-cl-q" name="show-cl-q"><label for="chk-cl-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-cl-f" name="show-cl-f"><label for="chk-cl-f">&nbsp;本戦</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-bf-p"><label for="chk-bf-p">&nbsp;Bitflyer</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-bf-q" name="show-bf-q"><label for="chk-bf-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-bf-f" name="show-bf-f"><label for="chk-bf-f">&nbsp;本戦</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-sh-p"><label for="chk-sh-p">&nbsp;SoundHound</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-sh-q" name="show-sh-q"><label for="chk-sh-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-sh-f" name="show-sh-f"><label for="chk-sh-f">&nbsp;本戦</label></li>
+                         <li><input type="checkbox" id="chk-sh" name="show-sh"><label for="chk-sh">&nbsp;その他</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-ni-p"><label for="chk-ni-p">&nbsp;全国統一プログラミング王決定戦</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-ni-q" name="show-ni-q"><label for="chk-ni-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-ni-f" name="show-ni-f"><label for="chk-ni-f">&nbsp;本戦</label></li>
+                         <li><input type="checkbox" id="chk-ni" name="show-ni"><label for="chk-ni">&nbsp;その他</label></li>
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-jsc-p"><label for="chk-jsc-p">&nbsp;日本最強プログラマー学生選手権</label>
+                       <ul>
+                         <li><input type="checkbox" id="chk-jsc-q" name="show-jsc-q"><label for="chk-jsc-q">&nbsp;予選</label></li>
+                         <li><input type="checkbox" id="chk-jsc-f" name="show-jsc-f"><label for="chk-jsc-f">&nbsp;本戦</label></li>
+                         <!-- <li><input type="checkbox" id="chk-jsc" name="show-jsc"><label for="chk-jsc">&nbsp;その他</label></li> -->
+                       </ul>
+                     </li>
+                     <li><input type="checkbox" id="chk-mu" name="show-mu"><label for="chk-mu">&nbsp;MUJIN Programming Challenge</label></li>
+                     <li><input type="checkbox" id="chk-ca" name="show-ca"><label for="chk-ca">&nbsp;CADDi</label></li>
+                     <li><input type="checkbox" id="chk-ai" name="show-ai"><label for="chk-ai">&nbsp;AISing Programming Contest</label></li>
+                     <li><input type="checkbox" id="chk-ke" name="show-ke"><label for="chk-ke">&nbsp;KEYENCE Programming Contest</label></li>
+                     <li><input type="checkbox" id="chk-ew" name="show-ew"><label for="chk-ew">&nbsp;エクサウィザーズ</label></li>
+                     <li><input type="checkbox" id="chk-dv" name="show-dv"><label for="chk-dv">&nbsp;diverta</label></li>
+                     <li><input type="checkbox" id="chk-ms" name="show-ms"><label for="chk-ms">&nbsp;M-SOLUTIONS</label></li>
+                     <li><input type="checkbox" id="chk-su" name="show-su"><label for="chk-su">&nbsp;三井住友信託銀行プログラミングコンテスト</label></li>
+                     <li><input type="checkbox" id="chk-hi" name="show-hi"><label for="chk-hi">&nbsp;日立製作所 社会システム事業部 プログラミングコンテスト2020</label></li>
+                     <li><input type="checkbox" id="chk-pa" name="show-pa"><label for="chk-pa">&nbsp;パナソニックプログラミングコンテスト2020</label></li>
+                     <li><input type="checkbox" id="chk-nm" name="show-nm"><label for="chk-nm">&nbsp;NOMURA プログラミングコンテスト 2020</label></li>
+                     <li><input type="checkbox" id="chk-tm" name="show-tm"><label for="chk-tm">&nbsp;東京海上日動　プログラミングコンテスト2020</label></li>
+                   </ul>
+           
+                 </li>
+                 <li><input type="checkbox">
+                   <span class="collapse-heading collapsed" data-toggle="collapse" data-target="#unofficial-contests" aria-expanded="false">
+                     非公式コンテスト
+                     <span class="glyphicon pull-right"></span>
+                   </span>
+                   <ul id="unofficial-contests" class="collapse">
+                     <li><input type="checkbox" id="chk-s8" name="show-s8"><label for="chk-s8">&nbsp;square869120 Contest</label></li>
+                     <li><input type="checkbox" id="chk-qu" name="show-qu"><label for="chk-qu">&nbsp;QUPC</label></li>
+                     <li><input type="checkbox" id="chk-nj" name="show-nj"><label for="chk-nj">&nbsp;NJPC</label></li>
+                     <li><input type="checkbox" id="chk-tk" name="show-tk"><label for="chk-tk">&nbsp;技術室奥プログラミングコンテスト</label></li>
+                     <li><input type="checkbox" id="chk-ir" name="show-ir"><label for="chk-ir">&nbsp;いろはちゃんコンテスト</label></li>
+                     <li><input type="checkbox" id="chk-sco" name="show-sco"><label for="chk-sco">&nbsp;CPSCO</label></li>
+                     <!--
+                         <li><input type="checkbox" id="chk-XX" name="show-XX"><label for="chk-XX">&nbsp;XXPC</label></li>
+                         -->
+                   </ul>
+                 </li>
+               </ul>
+             </div>
+             <div style="margin-top: 10px">
+               <label for="show-as" style="margin-top: 10px; font-weight: bold;">共通問題</label> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-html="true" data-toggle="tooltip" title="" data-original-title="ABC 042: C と ARC 058: C などの共通問題をどう表示するかを決めます．"></span>
+               <div id="show-as">
+                 <label for="show-as-abc">
+                   <input type="radio" name="show-as" id="show-as-abc" value="as-abc">
+                   Beginner 用のコンテストとして表示
+                 </label><br>
+                 <label for="show-as-arc">
+                   <input type="radio" name="show-as" id="show-as-arc" value="as-arc" checked="">
+                   Regular 用のコンテストして表示
+                 </label>
+               </div>
+             </div>
+           </div>
+           
+           <!-- -------------------------------- -->
+           <!-- -------------------------------- -->
+           
+           <span style="font-size: large" class="collapse-heading collapsed" data-toggle="collapse" data-target="#filter-with-writers" aria-expanded="false">
+             <p class="border">
+               <span>writer</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <div id="filter-with-writers" class="show-writer collapse">
+             <p class="small">縦棒 <code>|</code> 区切りで指定したユーザの少なくとも一人が writer に含まれる項目に絞り込みます．</p>
+             <input type="text" name="form-writer" class="form-control" placeholder="tourist|...">
+           </div>
+           
+           <!-- -------------------------------- -->
+           
+           <span style="font-size: large" class="collapse-heading collapsed" data-toggle="collapse" data-target="#filter-languages" aria-expanded="false">
+             <p class="border">
+               <span>言語</span>&nbsp;<span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-html="true" data-toggle="tooltip" title="" data-original-title="選んだ言語での進捗を表示します．"></span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <ul id="filter-languages" class="collapse" style="margin-top:10px">
+             <p class="small">縦長すぎて最悪ですが，UI は改善される予定です．</p>
+             <p class="small">「ジャッジ最新版での言語のみ選択」のようなのがあるとうれしい？</p>
+             <!-- ここ a -->
+             <!-- いや UI 以外も改善されるべきだろ -->
+             <div style="margin-top:5px; margin-bottom:5px">
+               <button class="btn btn-sm btn-danger" id="lang-toggle">言語を全て除外</button>
+             </div>
+           
+             <li><input type="checkbox" id="chk-C++"><label for="chk-C++">&nbsp;C++</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4003" name="4003"><label for="chk-4003">&nbsp;C++ (GCC 9.2.1)</label></li>
+                 <li><input type="checkbox" id="chk-4004" name="4004"><label for="chk-4004">&nbsp;C++ (Clang 10.0.0)</label></li>
+                 <li><input type="checkbox" id="chk-3003" name="3003"><label for="chk-3003">&nbsp;C++14 (GCC 5.4.1)</label></li>
+                 <li><input type="checkbox" id="chk-3005" name="3005"><label for="chk-3005">&nbsp;C++14 (Clang 3.8.0)</label></li>
+                 <li><input type="checkbox" id="chk-3029" name="3029"><label for="chk-3029">&nbsp;C++ (GCC 5.4.1)</label></li>
+                 <li><input type="checkbox" id="chk-3030" name="3030"><label for="chk-3030">&nbsp;C++ (Clang 3.8.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Bash"><label for="chk-Bash">&nbsp;Bash</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4007" name="4007"><label for="chk-4007">&nbsp;Bash (5.0.11)</label></li>
+                 <li><input type="checkbox" id="chk-3001" name="3001"><label for="chk-3001">&nbsp;Bash (GNU bash v4.3.11)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-C"><label for="chk-C">&nbsp;C</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-3002" name="3002"><label for="chk-3002">&nbsp;C (GCC 5.4.1)</label></li>
+                 <li><input type="checkbox" id="chk-3004" name="3004"><label for="chk-3004">&nbsp;C (Clang 3.8.0)</label></li>
+                 <li><input type="checkbox" id="chk-4001" name="4001"><label for="chk-4001">&nbsp;C (GCC 9.2.1)</label></li>
+                 <li><input type="checkbox" id="chk-4002" name="4002"><label for="chk-4002">&nbsp;C (Clang 10.0.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-C-sharp"><label for="chk-C-sharp">&nbsp;C#</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4010" name="4010"><label for="chk-4010">&nbsp;C# (.NET Core 3.1.201)</label></li>
+                 <li><input type="checkbox" id="chk-4011" name="4011"><label for="chk-4011">&nbsp;C# (Mono-mcs 6.8.0.105)</label></li>
+                 <li><input type="checkbox" id="chk-4012" name="4012"><label for="chk-4012">&nbsp;C# (Mono-csc 3.5.0)</label></li>
+                 <li><input type="checkbox" id="chk-3006" name="3006"><label for="chk-3006">&nbsp;C# (Mono 4.6.2.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Clojure"><label for="chk-Clojure">&nbsp;Clojure</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4013" name="4013"><label for="chk-4013">&nbsp;Clojure (1.10.1.536)</label></li>
+                 <li><input type="checkbox" id="chk-3007" name="3007"><label for="chk-3007">&nbsp;Clojure (1.8.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Lisp"><label for="chk-Lisp">&nbsp;Lisp</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4038" name="4038"><label for="chk-4038">&nbsp;Common Lisp (SBCL 2.0.3)</label></li>
+                 <li><input type="checkbox" id="chk-3008" name="3008"><label for="chk-3008">&nbsp;Common Lisp (SBCL 1.1.14)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-D"><label for="chk-D">&nbsp;D</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4015" name="4015"><label for="chk-4015">&nbsp;D (DMD 2.091.0)</label></li>
+                 <li><input type="checkbox" id="chk-4016" name="4016"><label for="chk-4016">&nbsp;D (GDC 9.2.1)</label></li>
+                 <li><input type="checkbox" id="chk-4017" name="4017"><label for="chk-4017">&nbsp;D (LDC 1.20.1)</label></li>
+                 <li><input type="checkbox" id="chk-3009" name="3009"><label for="chk-3009">&nbsp;D (DMD64 v2.070.1)</label></li>
+                 <li><input type="checkbox" id="chk-3010" name="3010"><label for="chk-3010">&nbsp;D (LDC 0.17.0)</label></li>
+                 <li><input type="checkbox" id="chk-3011" name="3011"><label for="chk-3011">&nbsp;D (GDC 4.9.4)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Fortran"><label for="chk-Fortran">&nbsp;Fortran</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4025" name="4025"><label for="chk-4025">&nbsp;Fortran(GNU Fortran 9.2.1)</label></li>
+                 <li><input type="checkbox" id="chk-3012" name="3012"><label for="chk-3012">&nbsp;Fortran (gfortran v4.8.4)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Go"><label for="chk-Go">&nbsp;Go</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4026" name="4026"><label for="chk-4026">&nbsp;Go (1.14.1)</label></li>
+                 <li><input type="checkbox" id="chk-3013" name="3013"><label for="chk-3013">&nbsp;Go (1.6)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Haskell"><label for="chk-Haskell">&nbsp;Haskell</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4027" name="4027"><label for="chk-4027">&nbsp;Haskell (GHC 8.8.3)</label></li>
+                 <li><input type="checkbox" id="chk-3014" name="3014"><label for="chk-3014">&nbsp;Haskell (GHC 7.10.3)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Java"><label for="chk-Java">&nbsp;Java</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4052" name="4052"><label for="chk-4052">&nbsp;Java (OpenJDK 1.8.0)</label></li>
+                 <li><input type="checkbox" id="chk-4005" name="4005"><label for="chk-4005">&nbsp;Java (OpenJDK 11.0.6)</label></li>
+                 <li><input type="checkbox" id="chk-3015" name="3015"><label for="chk-3015">&nbsp;Java7 (OpenJDK 1.7.0)</label></li>
+                 <li><input type="checkbox" id="chk-3016" name="3016"><label for="chk-3016">&nbsp;Java8 (OpenJDK 1.8.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-JavaScript"><label for="chk-JavaScript">&nbsp;JavaScript</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4030" name="4030"><label for="chk-4030">&nbsp;JavaScript (Node.js 12.16.1)</label></li>
+                 <li><input type="checkbox" id="chk-3017" name="3017"><label for="chk-3017">&nbsp;JavaScript (node.js v5.12)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-OCaml"><label for="chk-OCaml">&nbsp;OCaml</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4039" name="4039"><label for="chk-4039">&nbsp;OCaml (4.10.0)</label></li>
+                 <li><input type="checkbox" id="chk-3018" name="3018"><label for="chk-3018">&nbsp;OCaml (4.02.3)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Pascal"><label for="chk-Pascal">&nbsp;Pascal</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4041" name="4041"><label for="chk-4041">&nbsp;Pascal (FPC 3.0.4)</label></li>
+                 <li><input type="checkbox" id="chk-3019" name="3019"><label for="chk-3019">&nbsp;Pascal (FPC 2.6.2)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Perl"><label for="chk-Perl">&nbsp;Perl</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4042" name="4042"><label for="chk-4042">&nbsp;Perl (5.26.1)</label></li>
+                 <li><input type="checkbox" id="chk-3020" name="3020"><label for="chk-3020">&nbsp;Perl (v5.18.2)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Raku"><label for="chk-Raku">&nbsp;Raku</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4043" name="4043"><label for="chk-4043">&nbsp;Raku (Rakudo 2020.02.1)</label></li>
+                 <li><input type="checkbox" id="chk-3522" name="3522"><label for="chk-3522">&nbsp;Perl6 (rakudo-star 2016.01)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-PHP"><label for="chk-PHP">&nbsp;PHP</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4044" name="4044"><label for="chk-4044">&nbsp;PHP (7.4.4)</label></li>
+                 <li><input type="checkbox" id="chk-3021" name="3021"><label for="chk-3021">&nbsp;PHP (5.6.30)</label></li>
+                 <li><input type="checkbox" id="chk-3524" name="3524"><label for="chk-3524">&nbsp;PHP7 (7.0.15)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Python"><label for="chk-Python">&nbsp;Python</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4006" name="4006"><label for="chk-4006">&nbsp;Python (3.8.2)</label></li>
+                 <li><input type="checkbox" id="chk-4046" name="4046"><label for="chk-4046">&nbsp;PyPy2 (7.3.0)</label></li>
+                 <li><input type="checkbox" id="chk-4047" name="4047"><label for="chk-4047">&nbsp;PyPy3 (7.3.0)</label></li>
+                 <li><input type="checkbox" id="chk-4065" name="4065"><label for="chk-4065">&nbsp;Cython (0.29.16)</label></li>
+                 <li><input type="checkbox" id="chk-3022" name="3022"><label for="chk-3022">&nbsp;Python2 (2.7.6)</label></li>
+                 <li><input type="checkbox" id="chk-3023" name="3023"><label for="chk-3023">&nbsp;Python3 (3.4.3)</label></li>
+                 <li><input type="checkbox" id="chk-3509" name="3509"><label for="chk-3509">&nbsp;PyPy2 (5.6.0)</label></li>
+                 <li><input type="checkbox" id="chk-3510" name="3510"><label for="chk-3510">&nbsp;PyPy3 (2.4.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Ruby"><label for="chk-Ruby">&nbsp;Ruby</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4049" name="4049"><label for="chk-4049">&nbsp;Ruby (2.7.1)</label></li>
+                 <li><input type="checkbox" id="chk-3024" name="3024"><label for="chk-3024">&nbsp;Ruby (2.3.3)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Scala"><label for="chk-Scala">&nbsp;Scala</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4051" name="4051"><label for="chk-4051">&nbsp;Scala (2.13.1)</label></li>
+                 <li><input type="checkbox" id="chk-3025" name="3025"><label for="chk-3025">&nbsp;Scala (2.11.7)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Scheme"><label for="chk-Scheme">&nbsp;Scheme</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4053" name="4053"><label for="chk-4053">&nbsp;Scheme (Gauche 0.9.9)</label></li>
+                 <li><input type="checkbox" id="chk-3026" name="3026"><label for="chk-3026">&nbsp;Scheme (Gauche 0.9.3.3)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Text"><label for="chk-Text">&nbsp;Text</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4056" name="4056"><label for="chk-4056">&nbsp;Text (cat 8.28)</label></li>
+                 <li><input type="checkbox" id="chk-3027" name="3027"><label for="chk-3027">&nbsp;Text (cat)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Visual-Basic"><label for="chk-Visual-Basic">&nbsp;Visual Basic</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4058" name="4058"><label for="chk-4058">&nbsp;Visual Basic (.NET Core 3.1.101)</label></li>
+           
+                 <li><input type="checkbox" id="chk-3028" name="3028"><label for="chk-3028">&nbsp;Visual Basic (Mono 4.0.1)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Objective-C"><label for="chk-Objective-C">&nbsp;Objective-C</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4037" name="4037"><label for="chk-4037">&nbsp;Objective-C (Clang 10.0.0)</label></li>
+                 <li><input type="checkbox" id="chk-3501" name="3501"><label for="chk-3501">&nbsp;Objective-C (GCC 5.3.0)</label></li>
+                 <li><input type="checkbox" id="chk-3502" name="3502"><label for="chk-3502">&nbsp;Objective-C (Clang 3.8.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Octave"><label for="chk-Octave">&nbsp;Octave</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4040" name="4040"><label for="chk-4040">&nbsp;Octave (5.2.0)</label></li>
+                 <li><input type="checkbox" id="chk-3519" name="3519"><label for="chk-3519">&nbsp;Octave (4.0.2)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Swift"><label for="chk-Swift">&nbsp;Swift</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4055" name="4055"><label for="chk-4055">&nbsp;Swift (5.2.1)</label></li>
+                 <li><input type="checkbox" id="chk-3503" name="3503"><label for="chk-3503">&nbsp;Swift (swift-2.2-RELEASE)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Rust"><label for="chk-Rust">&nbsp;Rust</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4050" name="4050"><label for="chk-4050">&nbsp;Rust (1.42.0)</label></li>
+                 <li><input type="checkbox" id="chk-3504" name="3504"><label for="chk-3504">&nbsp;Rust (1.15.1)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Sed"><label for="chk-Sed">&nbsp;Sed</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4066" name="4066"><label for="chk-4066">&nbsp;Sed (4.4)</label></li>
+                 <li><input type="checkbox" id="chk-3505" name="3505"><label for="chk-3505">&nbsp;Sed (GNU sed 4.2.2)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Awk"><label for="chk-Awk">&nbsp;Awk</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4009" name="4009"><label for="chk-4009">&nbsp;Awk (GNU Awk 4.1.4)</label></li>
+                 <li><input type="checkbox" id="chk-3506" name="3506"><label for="chk-3506">&nbsp;Awk (mawk 1.3.3)</label></li>
+               </ul>
+             </li>
+             <!-- See COBOL. おなじ -->
+             <!-- <li><input type="checkbox" id="chk-4062" name="4062"><label for="chk-4062">&nbsp;Brainfuck (bf 20041219)</label></li> -->
+             <li><input type="checkbox" id="chk-3507" name="3507"><label for="chk-3507">&nbsp;Brainfuck (bf 20041219)</label></li>
+             <li><input type="checkbox" id="chk-Standard-ML"><label for="chk-Standard-ML">&nbsp;Standard ML</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4054" name="4054"><label for="chk-4054">&nbsp;Standard ML (MLton 20130715)</label></li>
+                 <li><input type="checkbox" id="chk-3508" name="3508"><label for="chk-3508">&nbsp;Standard ML (MLton 20100608)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Crystal"><label for="chk-Crystal">&nbsp;Crystal</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4014" name="4014"><label for="chk-4014">&nbsp;Crystal (0.33.0)</label></li>
+                 <li><input type="checkbox" id="chk-3511" name="3511"><label for="chk-3511">&nbsp;Crystal (0.20.5)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-F-sharp"><label for="chk-F-sharp">&nbsp;F#</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4022" name="4022"><label for="chk-4022">&nbsp;F# (.NET Core 3.1.201)</label></li>
+                 <li><input type="checkbox" id="chk-4023" name="4023"><label for="chk-4023">&nbsp;F# (Mono 10.2.3)</label></li>
+                 <li><input type="checkbox" id="chk-3512" name="3512"><label for="chk-3512">&nbsp;F# (Mono 4.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Unlambda"><label for="chk-Unlambda">&nbsp;Unlambda</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4064" name="4064"><label for="chk-4064">&nbsp;Unlambda (2.0.0)</label></li>
+                 <li><input type="checkbox" id="chk-3513" name="3513"><label for="chk-3513">&nbsp;Unlambda (0.1.3)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Lua"><label for="chk-Lua">&nbsp;Lua</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4033" name="4033"><label for="chk-4033">&nbsp;Lua (Lua 5.3.5)</label></li>
+                 <li><input type="checkbox" id="chk-4034" name="4034"><label for="chk-4034">&nbsp;Lua (LuaJIT 2.1.0)</label></li>
+                 <li><input type="checkbox" id="chk-3514" name="3514"><label for="chk-3514">&nbsp;Lua (5.3.2)</label></li>
+                 <li><input type="checkbox" id="chk-3515" name="3515"><label for="chk-3515">&nbsp;LuaJIT (2.0.4)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-3516" name="3516"><label for="chk-3516">&nbsp;MoonScript (0.5.0)</label></li>
+             <li><input type="checkbox" id="chk-3517" name="3517"><label for="chk-3517">&nbsp;Ceylon (1.2.1)</label></li>
+             <li><input type="checkbox" id="chk-Julia"><label for="chk-Julia">&nbsp;Julia</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4031" name="4031"><label for="chk-4031">&nbsp;Julia (1.4.0)</label></li>
+                 <li><input type="checkbox" id="chk-3518" name="3518"><label for="chk-3518">&nbsp;Julia (0.5.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Nim"><label for="chk-Nim">&nbsp;Nim</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4036" name="4036"><label for="chk-4036">&nbsp;Nim (1.0.6)</label></li>
+                 <li><input type="checkbox" id="chk-3520" name="3520"><label for="chk-3520">&nbsp;Nim (0.13.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-TypeScript"><label for="chk-TypeScript">&nbsp;TypeScript</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4057" name="4057"><label for="chk-4057">&nbsp;TypeScript (3.8)</label></li>
+                 <li><input type="checkbox" id="chk-3521" name="3521"><label for="chk-3521">&nbsp;TypeScript (2.1.6)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-Kotlin"><label for="chk-Kotlin">&nbsp;Kotlin</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4032" name="4032"><label for="chk-4032">&nbsp;Kotlin (1.3.71)</label></li>
+                 <li><input type="checkbox" id="chk-3523" name="3523"><label for="chk-3523">&nbsp;Kotlin (1.0.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-COBOL"><label for="chk-COBOL">&nbsp;COBOL</label>
+               <ul>
+                 <!-- ん、これ名前が完全に一致してませんか -->
+                 <!-- とりあえず、言語名で判断しているので、いらなそう？ -->
+                 <!-- <li><input type="checkbox" id="chk-4060" name="4060"><label for="chk-4060">&nbsp;COBOL - Fixed (OpenCOBOL 1.1.0)</label></li> -->
+                 <!-- <li><input type="checkbox" id="chk-4061" name="4061"><label for="chk-4061">&nbsp;COBOL - Free (OpenCOBOL 1.1.0)</label></li> -->
+                 <li><input type="checkbox" id="chk-3525" name="3525"><label for="chk-3525">&nbsp;COBOL - Fixed (OpenCOBOL 1.1.0)</label></li>
+                 <li><input type="checkbox" id="chk-3526" name="3526"><label for="chk-3526">&nbsp;COBOL - Free (OpenCOBOL 1.1.0)</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-4008" name="4008"><label for="chk-4008">&nbsp;bc (1.07.1)</label></li>
+             <li><input type="checkbox" id="chk-4018" name="4018"><label for="chk-4018">&nbsp;Dart (2.7.2)</label></li>
+             <li><input type="checkbox" id="chk-4019" name="4019"><label for="chk-4019">&nbsp;dc (1.4.1)</label></li>
+             <li><input type="checkbox" id="chk-4020" name="4020"><label for="chk-4020">&nbsp;Erlang (22.3)</label></li>
+             <li><input type="checkbox" id="chk-4021" name="4021"><label for="chk-4021">&nbsp;Elixir (1.10.2)</label></li>
+             <li><input type="checkbox" id="chk-4024" name="4024"><label for="chk-4024">&nbsp;Forth (gforth 0.7.3)</label></li>
+             <li><input type="checkbox" id="chk-Haxe"><label for="chk-Haxe">&nbsp;Haxe</label>
+               <ul>
+                 <li><input type="checkbox" id="chk-4028" name="4028"><label for="chk-4028">&nbsp;Haxe (4.0.3); js</label></li>
+                 <li><input type="checkbox" id="chk-4029" name="4029"><label for="chk-4029">&nbsp;Haxe (4.0.3); Java</label></li>
+               </ul>
+             </li>
+             <li><input type="checkbox" id="chk-4035" name="4035"><label for="chk-4035">&nbsp;Dash (0.5.8)</label></li>
+             <li><input type="checkbox" id="chk-4045" name="4045"><label for="chk-4045">&nbsp;Prolog (SWI-Prolog 8.0.3)</label></li>
+             <li><input type="checkbox" id="chk-4048" name="4048"><label for="chk-4048">&nbsp;Racket (7.6)</label></li>
+             <li><input type="checkbox" id="chk-4059" name="4059"><label for="chk-4059">&nbsp;Zsh (5.4.2)</label></li>
+             <li><input type="checkbox" id="chk-4063" name="4063"><label for="chk-4063">&nbsp;Ada2012 (GNAT 9.2.1)</label></li>
+             <li><input type="checkbox" id="chk-4067" name="4067"><label for="chk-4067">&nbsp;Vim (8.2.0460)</label></li>
+           </ul>
+           
+           <!-- -------------------------------- -->
+           
+           <span style="font-size: large" class="collapse-heading collapsed" data-toggle="collapse" data-target="#random" aria-expanded="false">
+             <p class="border">
+               <span>ランダム選択</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <!-- see https://qiita.com/akatsuki174/items/53b7367b04ed0b066bbf -->
+           <div id="random" class="form-row collapse">
+             <div class="mb-1">
+               <label for="random-none">
+                 <input type="radio" name="random-method" id="random-none" value="none" checked="">
+                 ランダム選択しない
+               </label>
+             </div>
+           
+             <div class="mt-1 mb-1">
+               <label for="random-by-number">
+                 <input type="radio" name="random-method" id="random-by-number" value="number">
+                 最大問題数を指定
+               </label>
+             </div>
+             <div id="random-by-number" class="row">
+               <div class="col-sm-4">
+                 <div class="input-group">
+                   <input class="form-control" placeholder="4" disabled="">
+                   <span class="input-group-addon">問を選択</span>
+                 </div>
+               </div>
+               <div class="col-sm-4">
+                 <button class="btn btn-default" disabled="">生成</button>
+               </div>
+             </div>
+           
+             <div class="mt-1 mb-1">
+               <label for="random-by-pattern">
+                 <input type="radio" name="random-method" id="random-by-pattern" value="pattern">
+                 パターンで指定
+               </label>
+               <p class="small">各問題の点数を <code>-</code> で区切って記述してください．整数値の代わりに <code>[a:b]</code> と書くことで，<code>a</code> 点以上 <code>b</code> 点以下の範囲を指定することもできます．
+                 前の問題からランダムに決めていくので，特定の状況下では適切な問題セットをご用意できないことがあります．</p>
+               <p class="small">また，指定順にかかわらず点数の昇順に表示されます．</p>
+             </div>
+             <div id="random-by-pattern" class="row">
+               <div class="col-sm-6">
+                 <input class="form-control" placeholder="100-200-[300:400]-[400:600]" pattern="^(?:\d+|\[\d+:\d+\])(?:-(?:\d+|\[\d+:\d+\]))*$" disabled="">
+               </div>
+               <div class="col-sm-4">
+                 <button class="btn btn-default" disabled="">生成</button>
+               </div>
+             </div>
+           </div>
+           
+           <!-- -------------------------------- -->
+           
+           <span style="font-size: large" class="collapse-heading collapsed" data-toggle="collapse" data-target="#filter-task-screen-name" aria-expanded="false">
+             <p class="border">
+               <span>問題 ID</span>
+               <span class="glyphicon pull-right"></span>
+             </p>
+           </span>
+           
+           <div id="filter-task-screen-name" class="collapse">
+             <p class="small">問題ページの URL 末尾の問題 ID（<strong>abc042_a</strong> のような部分）で絞り込みます．<code>TaskScreenName</code> と呼ばれているものです．</p>
+             <p class="small">簡易パターン文字列では <code>?</code> が任意の一文字に，<code>*</code> が任意の文字列にマッチします．正規表現は JavaScript の正規表現を利用します．いずれも完全一致のみが対象です．空欄でないときに有効になります．</p>
+             <p class="small">当サイトに求められている機能ではない気もしますが，個人的に欲しくなるときがあるので追加してみました．</p>
+           
+             <p class="small">ABC の D 問題を見たいときに <code>arc*_b</code> のことも気にしなきゃいけないのが面倒なので，それ用の変更をそのうち入れたいです．</p>
+             <input class="form-control" name="pattern" placeholder="abc1*_?">
+             
+             <input type="radio" name="use-as" id="use-as-pattern" value="pattern" checked=""><label for="use-as-pattern">&nbsp;簡易パターン文字列として解釈する</label><br>
+             <input type="radio" name="use-as" id="use-as-regex" value="regex"><label for="use-as-regex">&nbsp;正規表現として解釈する</label>
+           </div>
+           
+            </div>
+          </div>
+          <button type="button" id="config-reload" class="btn btn-primary">再読み込み</button>&nbsp;
+          <button type="button" id="config-reset" class="btn btn-default">リセット</button>
+        </div>
+
+        <div id="messages"><div id="tip" class="alert alert-default alert-dismissible" role="alert"><button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">x</span></button><span class="refresh fa fa-refresh" aria-hidden="true"></span>&nbsp;<span style=""><strong>Tips:</strong></span> <span id="tip-body"><button class="btn btn-primary cfg-reload">再読み込み</button> によって，フィルタを URL パラメータに反映させることができます．</span></div><div class="alert alert-default waiting" role="alert"><img style="vertical-align: text-bottom" src="./AtCoder Scores_files/waiting-cycle.gif" width="18">&nbsp;問題の一覧を取得しています...</div></div>
+
+        <!-- AOJ-ICPC みたいなやつ -->
+        <p class="small">得点部分をクリックするとその問題の先頭へジャンプします．</p>
+
+        <div class="panel panel-default">
+          <div class="table-responsive">
+            <table class="table table-condensed" id="rated-point">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>POINTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="whole">
+                  <td>TOTAL</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- end of AOJ-ICPC みたいなやつ -->
+
+
+
+        <!-- main contents -->
+        <div class="clearfix">
+          <p>
+            <span class="pull-right small mt-2">
+              1 ページあたり表示数:
+              <a class="tasks-per-page">10</a>&nbsp;
+              <a class="tasks-per-page selected">20</a>&nbsp;
+              <a class="tasks-per-page">30</a>&nbsp;
+              <a class="tasks-per-page">50</a>&nbsp;
+              <a class="tasks-per-page">100</a>&nbsp;
+              <a class="tasks-per-page">Infinity</a>
+              <a class="tasks-per-page">Flexible</a>
+            </span>
+          </p>
+        </div>
+        <hr class="mt-0 mb-1">
+        <div class="text-center">
+          <ul class="pagination pagination-sm mt-0 mb-1"></ul>
+        </div>
+        <!-- あれれ，横スクロールすることになってないですね -->
+        <div class="panel panel-default">
+          <div class="table-responsive">
+            <table id="task-table" class="table table-condensed table-striped table-hover">
+              <thead>
+                <tr>
+                  <th style="width: 10%;">得点</th>
+                  <th style="width: 45%; max-width: 50%;">問題</th>
+                  <th style="width: 25%; max-width: 30%;">writer</th>
+                  <th style="width: 10%;">部分点</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="text-center">
+          <ul class="pagination pagination-sm mt-0 mb-1"></ul>
+        </div>
+        <!-- end of main contents -->
+
+        <pre id="debug" class="hidden"></pre>
+
+      </div>
+      <!-- end of main-container -->
+
+    </div>
+    <!-- end of main-div -->
+
+    <div id="scroll-page-top" style="display: none;">
+      <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+      ページトップへ
+    </div>
+  
+
+</body></html>
