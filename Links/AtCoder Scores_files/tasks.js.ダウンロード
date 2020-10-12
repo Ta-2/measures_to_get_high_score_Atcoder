@@ -1,0 +1,2006 @@
+'use strict';
+
+/*
+ソースを見てくれるえびちゃんファンの皆さま，ありがとうございます．
+
+今回もいろいろおふざけポイントが入っているので，探してみてください．
+flag_[_0-9A-Za-z]{8}
+*/
+
+/*
+ユーザ名（userScreenName）のパターンって
+    /^[a-zA-Z][a-zA-Z0-9_]{2,15}$/
+のはずなのになんで
+    'XX'
+ってユーザ名が存在するんですか？？？ 処理上は別に困らないんですけど．
+DP fs GB gr hk IU jj K1 kj kr MA qg Qz SG Sn so st to UK ve XX yu zd zz
+結構ありますね．
+
+国旗の画像が XX.png で国籍 None なユーザも存在するんですね．
+これは IU のみが該当していて，
+https://beta.atcoder.jp/ranking?f.Country=XX&f.UserScreenName=%3F%3F&f.Affiliation=&f.BirthYearLowerBound=0&f.BirthYearUpperBound=9999&f.RatingLowerBound=0&f.RatingUpperBound=9999&f.HighestRatingLowerBound=0&f.HighestRatingUpperBound=9999&f.CompetitionsLowerBound=0&f.CompetitionsUpperBound=9999&f.WinsLowerBound=0&f.WinsUpperBound=9999
+などで確認可能です．
+
+? や ?????????????????* では一件もヒットしませんでした．
+0*, 1*, ..., 9*, _* でもヒットしませんでした．
+*/
+
+/*
+    $foo.on('click', function(e) {...})
+よりも
+    $foo.click(function(e) {...})
+の方がいいって記述を見た気がしてそれを使っていたんですが，嘘でした？
+
+https://stackoverflow.com/questions/9122078/difference-between-onclick-vs-click
+.click() の方だと各要素に対して個別にハンドラが作られ，新しく追加された要素に
+対してはバインドされません．
+.on('click') の方ではセレクタに合う要素に対する一つのハンドラが作られ，新しく
+追加された要素に対しても適用されるらしいです．
+
+あるいは別の似た関数がありました？ 初めの頃にいろいろ勘違いしたのかもしれません．
+*/
+
+/*
+submission にどんなのが入っているかのメモ
+Object {
+    execution_time: 5,
+    point: 300,
+    result: "AC",
+    problem_id: "agc005_a",
+    user_id: "rsk0315",
+    epoch_second: 1475335192,
+    contest_id: "agc005",
+    id: 907514,
+    language: "C++14 (GCC 5.4.1)",
+    length: 496
+}
+*/
+
+$(function() {
+    /* 定数たち */
+    // official の方は，beta.atcoder.jp をクロールして得たもの．
+    // そうでない方は，クロールしつつえびちゃんが半手動で作ったもの．
+    // 実質どっちも official なんですけどね．
+    const TASKS_URI = '/tasks.json';
+    const TASKS_OFFICIAL_URI = '/tasks-official.json';
+
+    const BY_POINT = 'Flexible'
+
+
+    /* 変数たち */
+    var params;
+
+    var tasks;
+    var taskSet;
+    // 詳細ってなんでしょうね．コンテスト時間や名前などです
+    var taskDetails;
+    var taskScore = {};  // map[taskScreenName] => point
+
+    // 計算量削減のために，対象でない（重み付き配点でない）問題への提出は
+    // 最初に入れるときにはじくようにしましょう．実装する人へ．
+    var submissions;  // {問題名: [その問題への提出] ...}
+
+    var data;
+    var filterForTask, filterForSubmission;
+    var page;
+    var numPages;
+
+    // {['rsk0315', 'user'], ['Tsuta_J', 'rival0'], ['TAB', 'rival1'], ...}
+    // 途中で仕様変更したのでここ汚いです．適宜 userInfo を使ってください．
+    var memberList;  // map[name] => kind
+    var userName = '';
+    var rivalSet = new Set();
+    var rivalNames = [];
+    // var submissionsURI;
+
+    var activeTasks, activeTaskNameSet;
+    var activeSubmissions = {};
+
+    var pointTable;  // ['user'][100] = 85 みたいなの
+    var countACs;    // ['user'] = 146 みたいなの
+    var countRJs;
+    var ratedPoint;
+    var filteredTasks;
+
+    var randomQuery = null;
+
+    var summaryUpToDate = false;
+
+    var lastTip = -1;
+
+    var debugMode = false;
+
+
+    /* class */
+    var Page = function() {
+        var numPerPage = getLS('numPerPage') || 20;
+        this.numPerPage = numPerPage;
+        var found = false;
+        $.each($('.tasks-per-page'), function(i, tpp) {
+            if (tpp.innerText == numPerPage) {
+                $(tpp).addClass('selected');
+                found = true;
+            } else {
+                $(tpp).removeClass('selected');
+            }
+        });
+        if (!found) {
+            this.numPerPage = numPerPage = 20;
+            delLS('numPerPage');
+            $.each($('.tasks-per-page'), function(i, tpp) {
+                if (tpp.innerText == numPerPage)
+                    $(tpp).addClass('selected');
+            });
+        }
+        if (typeof this.numPerPage === 'string' && !this.numPerPage.match(/\D/)) {
+            this.numPerPage = parseInt(this.numPerPage);
+            setLS('numPerPage', this.numPerPage);
+        }
+        this.page = 1;
+    };
+    Page.prototype.setPage = function(_page) {
+        this.page = _page;
+    };
+    Page.prototype.getBegin = function() {
+        if (this.numPerPage === 'Infinity') return 0;
+        if (this.numPerPage === BY_POINT) {
+            var point = parseInt($('#rated-point th')[this.page+1].innerText);
+            return lowerBound(data.tasks, point);
+        }
+        return (this.page-1) * this.numPerPage;
+    };
+
+    var Data = function(tasks, submissions) {
+        this.tasks = tasks;
+        this.submissions = submissions;
+    };
+
+    var TaskFilter = function() {
+        this.lowerBound = 0;
+        this.upperBound = 1000000;
+        this.includePartial = false;
+        this.category = arrayToSet(OFFICIAL_CONTESTS);
+        this.showForBeginners = false;
+        this.writers = null;
+        this.hides = {};
+        this.favOnly = false;
+        this.taskName = '';
+        this.tp = 'pattern';
+        this.taskRE = null;
+    };
+    TaskFilter.prototype.resetTaskRegExp = function() {
+        this.taskRE = makeRegExp(this.taskName, this.tp);
+    };
+    TaskFilter.prototype.match = function(task) {
+        // 「フィルタにマッチする」，
+        // 防ぐ条件にマッチしたのか通す条件にマッチしたのかわからないね．
+        // ここでは後者だよね
+        if (this.taskRE) {
+            var m = task.taskScreenName.match(this.taskRE);
+            if (m === null || m[0] != task.taskScreenName) return false;
+        }
+
+        var partial = false;
+        if (this.includePartial && task.partialScore !== null) {
+            var partials = task.partialScore.match(/\d+/g);
+            for (var i in partials) {
+                var point = parseInt(partials[i]);
+                if (point >= this.lowerBound && point <= this.upperBound) {
+                    partial = true;
+                    break;
+                }
+            }
+        }
+        if (!partial && task.fullScore < this.lowerBound) return false;
+        if (!partial && task.fullScore > this.upperBound) return false;
+        if (!this.category.has(task.contestCategory)) return false;
+
+        // ABC のみ表示 && Regular として表示，な場合どうするのがいいのかな
+        if (this.showForBeginners && task.common == 'r') return false;
+        if (!this.showForBeginners && task.common == 'b') return false;
+
+        if (this.writers !== null) {
+            var match = false;
+            for (var i in task.writers) {
+                if (task.writers[i][0].match(this.writers)) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) return false;
+        }
+
+        // これは log(|お気に入り集合|) かかるので避けれるならやりたくない
+        // 他のフィルタを通してからやりたい，と思ったんですが，
+        // その集合ってそんなに多くないはずなんですよね．ア
+        if (this.favOnly && !favSet.has(task.taskScreenName)) return false;
+
+        return true;
+    };
+    TaskFilter.prototype.matchWithSubmissions = function(task) {
+        if (isEmptyObject(memberList)) return true;  // XXX
+
+        var subm = activeSubmissions[task.taskScreenName];
+        if (subm === undefined) {
+            if (this.hides['none-ac']) return false;
+            if (this.hides['user-noac']) return false;
+            if (this.hides['user-nosub']) return false;
+            if (this.hides['any-noac']) return false;
+            return true;
+        }
+
+        var acceptees = 0;
+        if (userName) {
+            if (subm[userName] !== undefined) {
+                // CE の場合って subm に入れないことになってるよね
+                var accepted = (subm[userName].result == 'AC');
+                if (accepted) {
+                    if (this.hides['any-ac']) return false;
+                    if (this.hides['user-ac']) return false;
+                    if (!rivalNames.length && this.hides['all-ac']) return false;
+                    ++acceptees;
+                } else {
+                    if (this.hides['user-noac']) return false;
+                }
+            } else {
+                if (this.hides['user-nosub']) return false;
+                if (this.hides['user-noac']) return false;
+            }
+        }
+
+        for (var user in subm) {
+            if (user == userName) continue;
+            if (subm[user].result == 'AC') {
+                if (this.hides['any-ac']) return false;
+                ++acceptees;
+            }
+        }
+        if (acceptees == 0 && this.hides['none-ac']) return false;
+        if (acceptees == rivalNames.length+!!userName && this.hides['all-ac'])
+            return false;
+        if (acceptees < rivalNames.length+!!userName && this.hides['any-noac'])
+            return false;
+
+        return true;
+    }
+
+    var SubmissionFilter = function() {
+        this.languages = null;  // all
+        this.after = 0;
+        this.before = Infinity;
+        // AC 状況みたいなのは全員分見る必要が出てきがちなので
+        // ここではできません．
+        this.onlyInContests = false;
+    };
+    SubmissionFilter.prototype.setBefore = function(dateString) {
+        var tmp = dateToSec(dateString);
+        this.before = ((tmp !== undefined)? tmp : Infinity);
+   };
+    SubmissionFilter.prototype.setAfter = function(dateString) {
+        var tmp = dateToSec(dateString);
+        this.after = ((tmp !== undefined)? tmp : 0);
+        // if (dateString === undefined || !dateString.match(DATE_RE)) return;
+        // var tmp = new Date(dateString.trim());
+        // this.after = Math.floor(tmp.getTime() / 1000);
+    };
+    SubmissionFilter.prototype.match = function(submission) {
+        if (this.languages !== null) {
+            // あー、アプデコンでこわれるのこれじゃん、なるほどね
+            if (!this.languages.has(submission.language)) return false;
+        }
+        if (submission.epoch_second < this.after) return false;
+        if (submission.epoch_second >= this.before) return false;
+
+        if (this.onlyInContests) {
+            var taskScreenName = submission.problem_id;
+            var moments = taskDetails[taskScreenName]['moments']
+            // あれ？ 桁数が同じなら parseInt いらないみたいなところある？
+            // や，こわれてたんですが
+            var after = parseInt(moments[0]);
+            var before = parseInt(moments[1]);
+
+            // コンテスト前に提出する人とは
+            // if (submission.epoch_second < after) return false;
+            // や，これ，オープンコンテストとかで開始時間がどうで，
+            // みたいなときにこわれるので暫定的に隠します．
+            // ちゃんとクローズドコンテストについても
+            // クロールしておくべきかもしれません．
+
+            // 22:40:00 までのコンテストって 22:40:00 の提出は
+            // 考慮されるんですか？
+            if (submission.epoch_second >= before) return false;
+        }
+        return true;
+    };
+
+    function isRival(name) {
+        return rivalSet.has(name);
+    }
+
+    function lowerBound(tasks, point) {
+        var lb = -1;
+        var ub = tasks.length;  // これ point が 5000 とかのとき大丈夫？
+        while (ub-lb > 1) {
+            var mid = Math.floor((lb+ub)/2);
+            if (tasks[mid].fullScore < point) {
+                lb = mid;
+            } else {
+                ub = mid;
+            }
+        }
+        return ub;
+    }
+
+    function jumpTo(point) {
+        var i = lowerBound(data.tasks, point);
+        var npp = page.numPerPage;
+
+        if (npp === 'Infinity') {
+            page.setPage(1);
+        } else if (npp == BY_POINT) {
+            var $th = $('#rated-point th').slice(2);
+            for (var j=0; j<$th.length; ++j) {
+                if ($th[j].innerText == point) {
+                    page.setPage(j+1);
+                    break;
+                }
+            }
+        } else {
+            page.setPage(Math.floor(i/npp)+1);
+        }
+        draw();
+        if (true) {
+            // 1 ページなら？ ページ指定が Infinity なら？
+            // お気に入りのみ表示で 1 ページのときも？
+            // ともかく，ページ送りが不要なときは旧 UI のときみたく
+            // その頭まで飛びたくないですか？
+            // あるいはそれ以外のときもやっちゃいますか？
+            var j;
+            if (page.numPerPage === 'Infinity') {
+                j = i;
+            } else if (page.numPerPage === BY_POINT) {
+                return;  //
+
+                // j = parseInt($('#rated-point th')[page.page+1].innerText);
+                j = 0;
+            } else {
+                j = i % npp;
+            }
+            var tr = $('#task-table>tbody>tr')[j];
+            $('html, body').animate({
+                // navbar のぶんを適当に．実際きつきつにする必要はないので
+                scrollTop: $(tr).offset().top-80,
+            }, 500);
+        }
+    }
+
+    function drawPagination() {
+        var html = '';
+        var ps = [];
+        if (numPages <= 10) {
+            for (var i=1; i<=numPages; ++i) ps.push(i);
+        } else {
+            ps.push(page.page);
+            for (var w=2; page.page-(w-1)>=1; w<<=1)
+                ps.unshift(page.page-(w-1));
+            if (ps[0] != 1) ps.unshift(1);
+            for (var w=2; page.page+(w-1)<=numPages; w<<=1)
+                ps.push(page.page+(w-1));
+            if (ps[ps.length-1] != numPages) ps.push(numPages);
+        }
+
+        for (var i=0; i<ps.length; ++i) {
+            var p = ps[i];
+            html += '<li{0}><a href="">{1}</a></li>\n'
+                .format((p==page.page? ' class="active"':''), p);
+        }
+
+        $('.pagination').html(html);
+        $('.pagination a').click(function() {
+            page.setPage(parseInt($(this).text()) || $(this).text());
+            draw();
+            return false;
+        });
+    }
+
+    function userHTML(info) {
+        if (info.error) {
+            return '<div class="warning" aria-hidden="true" data-html="true" data-toggle="tooltip" title="" data-original-title="{0}"><span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;<span>{1}</span></div>'.format(info.error, info.name);
+        }
+
+        var res = '';
+        if (info.crown) {
+            // これ rating >= 3200 か
+            res += '<img src="{0}" width="16">&nbsp;'.format(info.crown);
+        } else {
+            var rating = info.rating;
+            var loColor = USER_COLORS[0];
+            var hiColor = USER_COLORS[0];
+            var ratio = 0.0;
+            if (typeof rating === 'string') {
+                rating = parseInt(rating);
+                ratio = (rating % 400) / 4;
+                var colorIndex = Math.floor(rating / 400);
+                // loColor = USER_COLORS[colorIndex];
+                loColor = '#FFFFFF';
+                hiColor = USER_COLORS[colorIndex+1];
+            }
+            res += '<span style="display: inline-block; border-radius: 50%; border: solid 1px {0}; background: -webkit-linear-gradient(bottom, {0} 0%, {0} {2}%, {1} {2}%, {1} 100%); height: 14px; width: 14px; vertical-align: sub"></span>&nbsp;'.format(hiColor, loColor, ratio);
+        }
+        res += '<a target="_blank" class="username" href="//atcoder.jp/users/{0}">'.format(info.name);
+        res += '<span';
+        if (info.style) {
+            res += ' style="{0}"'.format(info.style)
+        }
+        if (info.class) {
+            res += ' class="{0}"'.format(info.class);
+        }
+        if (info.rating) {
+            res += ' aria-hidden="true" data-toggle="tooltip" title="" data-html="true"';
+            res += ' data-original-title="{0} ({1})"'.format(info.rating, info.highest);
+        } else {
+            res += ' aria-hidden="true" data-toggle="tooltip" title="" data-html="true"';
+            res += ' data-original-title="unrated"'.format(info.rating, info.highest);
+        }
+        res += '>'+e(info.name)+'</span></a>';
+        return res;
+    }
+
+    function sortBy(criterion) {
+        var list = [];  // [info, ...]
+        for (var kind in userInfo) list.push(userInfo[kind]);
+
+        var cmp;
+        if (criterion == 'input') {
+            cmp = function(a, b) {
+                if (a.kind == 'user') return -1;
+                if (b.kind == 'user') return +1;
+                return parseInt(a.kind.slice(5)) - parseInt(b.kind.slice(5));
+            };
+        } else if (criterion == 'rating') {
+            cmp = function(a, b) {
+                return -(parseInt(a.rating) - parseInt(b.rating));
+            };
+        } else if (criterion == 'highest') {
+            cmp = function(a, b) {
+                return -(parseInt(a.highest) - parseInt(b.highest));
+            };
+        } else if (criterion == 'ratedpoint') {
+            cmp = function(a, b) {
+                return -(ratedPoint[a.kind] - ratedPoint[b.kind]);
+            };
+        } else if (criterion == 'alphabetical') {
+            cmp = function(a, b) {
+                return a.name.localeCompare(b.name);
+            };
+        } else /* */ {
+            cmp = function() {
+                alertPopUp('不正な比較関数です．', 'warning', 'unknown-comparison');
+            };
+        }
+
+        list.sort(cmp);
+        for (var i in list) {
+            i = parseInt(i);
+            var kind = list[i].kind;
+
+            $($('#rated-point>tbody>tr')[i+1]).attr('class', kind);
+            $($('#rated-point>tbody td:first-child')[i+1]).html(userHTML(list[i]));
+            $($('#ac-count>tbody>tr')[i]).attr('class', kind);
+            $($('#ac-count>tbody td:first-child')[i]).html(userHTML(list[i]));
+        }
+        $('[data-toggle=tooltip]').tooltip();
+    }
+
+    function resetSummary() {
+        $('#rated-point>thead>tr').children().slice(2).remove();
+        $('#rated-point tr.whole').children().slice(2).remove();
+        for (var name in memberList) {
+            var kind = memberList[name];
+            $('#rated-point tr.'+kind).children().slice(2).remove();
+            $('#ac-count tr.'+kind).children().slice(1).text(0);
+        }
+        $.each($('#rated-point>tbody>tr'), function(i, tr) {
+            tr.children[1].innerText = 0;
+        });
+    }
+
+    function animateSummary() {
+        // このにゅるっと出るやつ好きなんですよね
+        // EASE_IN_OUT[] の値を変えることで，にゅるっと具合を変えられます．
+        // とりあえず今は arctan な滑らかさでやっています．
+
+        // これ，ページ送りするたびにぱたぱたするのうるさいですね．
+        // もう少し制限することにします．
+        $.each($('#rated-point td'), function(i, td) {
+            var $td = $(td);
+            var percent = $td.attr('data-percent');
+            if (percent === undefined) return;
+
+            // transparent と white を使って，.point_* の色を隠す手法だと
+            // html2canvas でゴミの線が現れるんですよね．やめます
+
+            // 今は transparent にしてしまっているので，まどろっこしい方法で
+            // 背景色を取得します．やめたい
+            // 'point point_*' => '.point_*'
+            // removeClass(/point_.*/);
+            // hidden な要素を hidden に保たないとこわれるので注意
+            var class_ = $td.attr('class').split(' ');
+            var point = class_.filter(e => e.match(/point_.+/))[0];
+            if (!point) { /* tsurai */ }
+
+            var fgColor = $('.'+point).css('color');
+            var bgColor = $('.'+point).css('background-color');
+            $td.removeClass(point);
+
+            setTimeout(function() {
+                var i = 0;
+                var id = setInterval(function() {
+                    if (i >= 21) {
+                        clearInterval(id);
+                        return;
+                    }
+                    $(td).css({
+                        color: fgColor,
+                        'background-color': '',
+                        'background-image': (
+                            'linear-gradient(to top, {1} 0%, '
+                                + '{1} {0}%, '
+                                + '{2} {0}%, {2} 100%)'
+                        ).format(percent*EASE_IN_OUT[i]/100, bgColor, 'transparent'),
+                        'background-repeat': 'no-repeat',
+                    });
+                    // ++i を知らないわけではなくて，ここは値を調整しがちなため．
+                    i += 1;
+                }, 15);
+            }, 100);
+        });
+
+        $.each($('#ac-count tbody tr'), function(i, tr) {
+            var tds = tr.children;
+            var acc = parseInt(tds[1].innerText);
+            var rej = parseInt(tds[2].innerText);
+            var whl = acc + rej + parseInt(tds[3].innerText);
+            
+            setTimeout(function() {
+                var i = 0;
+                var id = setInterval(function() {
+                    if (i >= 21) {
+                        clearInterval(id);
+                        return;
+                    }
+                    for (var j=0; j<3; ++j) {
+                        var first = acc*3/whl*EASE_IN_OUT[i];
+                        var second = (acc+rej)*3/whl*EASE_IN_OUT[i];
+                        $(tds[j+1]).css({
+                            'background-repeat': 'no-repeat',
+                            'background-image': (
+                                'linear-gradient(to right, '
+                                    + '{2} 0%, {2} {0}%, '
+                                    + '{3} {0}%, {3} {1}%, '
+                                    + '{4} {1}%, {4} 100%)'
+                            ).format(
+                                // 各 <td> の幅が同じなのを仮定しています
+                                clamp(first-j*100, 0, 100),
+                                clamp(second-j*100, 0, 100),
+                                '#dff0d8', '#faf2cc', 'white',
+                            ),
+                        });
+                    }
+                    i += 1;
+                }, 15);
+            }, 100);
+        });
+
+        summaryUpToDate = true;
+    }
+
+    function drawSummary() {
+        // data.tasks は先にいい感じにしてください
+
+        countACs = {};
+        countRJs = {};
+        for (var name in memberList) {
+            var kind = memberList[name];
+            countACs[kind] = 0;
+            countRJs[kind] = 0;
+            pointTable[kind] = {};
+            ratedPoint[kind] = 0;
+        }
+
+        for (var taskScreenName in data.submissions) {
+            // 問題名と提出者名がどちらも同じものはたかだか一つと仮定しています
+            var tmp = data.submissions[taskScreenName];
+            for (var userScreenName in tmp) {
+                var kind = memberList[userScreenName];
+                var submission = tmp[userScreenName];
+                if (submission.result == 'CE')
+                    continue;
+
+                if (submission.result != 'AC') {
+                    ++countRJs[kind];
+                    continue;
+                }
+
+                ++countACs[kind];
+
+                if (pointTable[kind][submission.point] === undefined) {
+                    pointTable[kind][submission.point] = 1;
+                } else {
+                    ++pointTable[kind][submission.point];
+                }
+                ratedPoint[kind] += submission.point;
+            }
+        }
+
+        // やる前に表をリセットしてください．
+        resetSummary();
+        sortBy($('#users-sorted-by').val());
+
+        for (var name in memberList) {
+            var kind = memberList[name];
+            var $tds = $('#ac-count tr.'+kind).children();
+
+            var acc = countACs[kind];
+            var rej = countRJs[kind];
+            var whl = filteredTasks + data.tasks.length;
+            var uns = whl - (acc+rej);
+            $tds[1].innerText = acc;
+            $tds[2].innerText = rej;
+            $tds[3].innerText = uns;
+        }
+
+        var $tr1 = $('#rated-point>thead>tr');
+        var $tr2 = $('#rated-point tr.whole');
+        for (var point in pointTable['whole']) {
+            var class_ = 'class="point point_{0}"'.format(pointToColor(point));
+            $tr1.append('<th {0}>{1}</th>'.format(class_, point));
+            $tr2.append('<td {0}>{1}</td>'.format(class_, pointTable['whole'][point]));
+        }
+
+        $('#rated-point>thead>tr>th.point').click(function() {
+            jumpTo(parseInt($(this).text()));
+        });
+
+        $('#rated-point tr.whole>td')[1].innerText = ratedPoint.whole;
+        for (var name in memberList) {
+            var kind = memberList[name];
+            for (var point in pointTable['whole']) {
+                var fgColor = $('.point_'+pointToColor(point)).css('color');
+                var bgColor = $('.point_'+pointToColor(point)).css('backgroundColor');
+                var prog = (pointTable[kind][point] || 0);
+                var whole = pointTable['whole'][point];
+                var style = 'class="point point_{0}" style="background-color: transparent;"'.format(
+                    pointToColor(point));
+
+                var percent = Math.floor(100 * prog / whole);
+
+                if (prog == whole) {
+                    style = 'class="point point_{0}" style="background-color: transparent; font-family: Glyphicons Halflings;"'.format(
+                        pointToColor(point)
+                    );
+                    prog = '&#xe013;';
+                }
+
+                $('#rated-point tbody>tr.'+kind)
+                    .append('<td {0} data-percent="{2}">{1}</td>'.format(style, prog, percent));
+            }
+            $('#rated-point tr.'+kind+'>td')[1].innerText = ratedPoint[kind];
+        }
+
+        var zeroSup = ($('input[name=zero-suppress]:checked').length != 0);
+        if (!zeroSup) {
+            animateSummary();
+            return;
+        }
+
+        var i = 2;
+        var gap = 0;
+        for (var point in pointTable['whole']) {
+            var allZero = true;
+            for (var name in memberList) {
+                var kind = memberList[name];
+                var count = $('#rated-point tr.'+kind+'>td')[i].innerText;
+                if (count != '0') {
+                    allZero = false;
+                    break;
+                }
+            }
+            if (allZero) {
+                var $th = $($('#rated-point th')[i]);
+                var td = $('#rated-point tr.whole td')[i];
+                gap += parseInt($th.text()) * parseInt(td.innerText);
+                $th.addClass('hidden');
+                $('#rated-point tr>td:nth-child({0})'.format(i+1)).addClass('hidden');
+            }
+            ++i;
+        }
+        if (gap) {
+            $('#rated-point tr.whole>td')[1].innerText = ratedPoint['whole']-gap;
+            $($('#rated-point tr.whole>td')[1])
+                .append('<span style="color: #aaa; font-weight: normal;" class="small"> (+{0})</span>'.format(gap));
+        }
+        animateSummary();
+    }
+
+    function encodeLanguages() {
+        var $langs = $('#filter-languages input:checkbox');
+        var langsBin = '';
+        for (var i=0; i<LANGUAGES.length; ++i)
+            langsBin += ($('input[name='+LANGUAGES[i][1]+']').is(':checked')? '1':'0');
+
+        if (langsBin.length % 4 != 0)
+            langsBin += '0'.repeat(4-langsBin.length%4);
+
+        // reverse
+        langsBin = langsBin.split('').reverse().join('');
+
+        var langsHex = '';
+        for (var i=0; i<langsBin.length; i+=4) {
+            var x=0;
+            for (var j=0; j<4; ++j)
+                if (langsBin[i+j] == '1')
+                    x |= 1 << (3-j);
+            langsHex += '0123456789ABCDEF'[x];
+        }
+        langsHex = langsHex.replace(/^0+/, '');
+        if (langsHex == '') return '0';
+        return langsHex;
+    }
+
+    function decodeLanguages(encoded) {
+        if (encoded == '' || encoded === undefined)
+            // これ対応してないブラウザしゃんね
+            // return arrayToSet(LANGUAGES.map(e => e[0]));
+            return arrayToSet(LANGUAGES.map(function(e) { return e[0]; }));
+
+        var langs = new Set();
+        for (var i=0; i<encoded.length; ++i) {
+            var c = encoded[encoded.length-i-1];
+            var x = parseInt(c, 16);
+            for (var j=0; j<4; ++j) {
+                if (x >> j & 1) {
+                    if (i*4+j >= LANGUAGES.length) {
+                        i = encoded.length;
+                        break;
+                    }
+                    langs.add(LANGUAGES[i*4+j][0]);
+                }
+            }
+        }
+        return langs;
+    }
+
+    function generateParam() {
+        var param = {};
+        var formUserName = $('input[name=form-username]').val()
+            .replace(/\W/g, '');
+        var formRivalNames = $('input[name=form-rivalnames]').val()
+            .replace(/[^\w,]/g, '');
+        if (formUserName)
+            param.user = formUserName;
+        if (formRivalNames)
+            param.rivals = formRivalNames;
+        if (filterForTask.lowerBound != 0)
+            param.lb = filterForTask.lowerBound;
+        if (filterForTask.upperBound != 1000000)
+            param.ub = filterForTask.upperBound;
+        if (filterForTask.showForBeginners)
+            param.common = 'beginner';
+
+        var category = filterForTask.category;
+        if (!equalSet(category, arrayToSet(OFFICIAL_CONTESTS)))
+            param.category = setToArray(category).join(',');
+
+        var hides = [];
+        for (var key in filterForTask.hides) hides.push(key);
+        if (hides.length)
+            param.hides = hides.join(',');
+
+        if (filterForSubmission.onlyInContests)
+            param.in_contests = true;
+
+        if (filterForTask.includePartial)
+            param.partial = true;
+
+        if (filterForTask.writers)
+            param.writers = regExpToPat(filterForTask.writers);
+
+        if (filterForTask.taskName)
+            param.taskName = filterForTask.taskName;
+        if (filterForTask.tp == 'regex')
+            param.tp = filterForTask.tp;
+
+        var langs = encodeLanguages();
+        if (langs != ALL_LANGUAGES)
+            param.languages = langs;
+
+        var dateFrom = filterForSubmission.after;
+        var dateTo = filterForSubmission.before;
+        if (dateFrom > AGC001_STARTS)
+            param.from = dateFrom;
+        if (dateTo < Infinity)
+            param.to = dateTo;
+
+        var paramString = $.param(param);
+        if (paramString) return '?' +  paramString;
+        return '';
+    }
+
+    function getNames() {
+        rivalNames = [];
+        for (var name in memberList) {
+            var kind = memberList[name];
+            if (kind == 'user') {
+                $('input[name=form-username]').val(name);
+                userName = name;
+            } else {
+                rivalNames.push(name);
+            }
+        }
+        rivalSet = arrayToSet(rivalNames);
+        $('input[name=form-rivalnames]').val(rivalNames.join(', '));
+    }
+
+    function restoreParams() {
+        params = $.url($(location).attr('search')).param();
+
+        /*
+          昔の版のパラメータの形式です
+          ?lbound=2300
+          &ubound=2400
+          &as_abc=on
+          &show_contests=hoge
+          &user=rsk0315
+          &rivals=tab
+          &writers=yutaka1999
+          &include_partial=on
+
+          新しい版のパラメータの形式です．
+          ?user=rsk0315
+          &rivals=tab
+          &lb=2300
+          &ub=2400
+          &common=beginner
+          &category=hoge
+          &hides=none-ac
+          &partial=true
+          &writers=yutaka1999
+
+          さすがに非互換になると嫌だと思うので，よしなにやります．
+          lbound -> lb
+          ubound -> ub
+          as_abc=on -> common=beginner
+          show_contests -> category
+          include_partial=on -> partial=true
+
+          フィルタは形式を変えたので非互換でもいいですか？
+        */
+
+        var category = (params.category || params.show_contests);
+        if (category) {
+            filterForTask.category
+                = arrayToSet(category.replace(/[^-\w,]/g, '').split(','));
+        }
+
+        var forBeginner = (params.common == 'beginner') || (params.as_abc == 'on');
+        if (forBeginner)
+            filterForTask.showForBeginners = true;
+
+        filterForSubmission.onlyInContests = (params.in_contests == 'true');
+
+        var lbStr = (params.lb || params.lbound);
+        if (lbStr) {
+            var lb = lbStr.replace(/\D/g, '') || '0';
+            filterForTask.lowerBound = parseInt(lb);
+        }
+        var ubStr = (params.ub || params.ubound);
+        if (ubStr) {
+            // parseInt(ub) || 1000000 だと，'0' を食わされたときにこわれます
+            // そんなことする人がいるかは知らないですけど
+            var ub = ubStr.replace(/\D/g, '') || '1000000';
+            filterForTask.upperBound = parseInt(ub);
+        }
+
+        if (params.hides) {
+            var hides = params.hides.replace(/[^\w,-]/g, '').split(',');
+            for (var i in hides)
+                filterForTask.hides[hides[i]] = true;
+        }
+
+        if (params.partial || params.include_partial)
+            // off とか false とか no とかそういうのはもうアレって感じで
+            filterForTask.includePartial = true;
+
+        var writerPattern = (params.writers || '').replace(/[^\w|]/g, '');
+        filterForTask.writers
+            = (writerPattern? RegExp('^(?:'+writerPattern+')$', 'i'):null);
+
+        // これ，コンテスト種別と統合できて，`a[brgp]c_..?` みたいなのを
+        // デフォルト値にするといいはずなんですが，それはそれでいいのか
+        // わからないため
+        filterForTask.taskName = (params.taskName || '');
+        filterForTask.tp = (params.tp || 'pattern');
+
+        if (params.from && !params.from.match(/\D/))
+            filterForSubmission.after = parseInt(params.from);
+        if (params.to && !params.to.match(/\D/))
+            filterForSubmission.before = parseInt(params.to);
+
+        filterForSubmission.languages = decodeLanguages(params.languages);
+    }
+
+    /* ここから旧バージョンのコピペ */
+    var quals = new Set(OFFICIAL_CONTESTS.filter(function(tag) {
+        return tag.endsWith('-q');
+    }));
+    var finals = new Set(OFFICIAL_CONTESTS.filter(function(tag) {
+        return tag.endsWith('-f');
+    }));
+    function toggle($this, $boxes) {
+        $.each($boxes, function(i, checkbox) {
+            $(checkbox).prop('checked', $this.hasClass('btn-default'));
+        });
+        if ($this.hasClass('btn-default')) {
+            $this.text($this.text().substr(0, 3)+'全て除外')
+                .removeClass('btn-default')
+                .addClass('btn-danger');
+        } else {
+            $this.text($this.text().substr(0, 3)+'全て選択')
+                .removeClass('btn-danger')
+                .addClass('btn-default');
+        }
+        // ここきたない
+        initCheckboxList($('#filter-contests'));
+        initCheckboxList($('#filter-languages'));
+    }
+    function updateToggle() {
+        var $quals = $('ul input:checkbox').filter(function() {
+            return quals.has(this.name.substr(5));  // show_...
+        });
+        var $finals = $('ul input:checkbox').filter(function() {
+            return finals.has(this.name.substr(5));
+        });
+        var $langs = $('#filter-languages input:checkbox');
+        if ($quals.length == $quals.filter(':checked').length) {
+            $('#qual-toggle')
+                .removeClass('btn-default')
+                .addClass('btn-danger')
+                .text('予選を全て除外');
+        } else {
+            $('#qual-toggle')
+                .removeClass('btn-danger')
+                .addClass('btn-default')
+                .text('予選を全て選択');
+        }
+        if ($finals.length == $finals.filter(':checked').length) {
+            $('#final-toggle')
+                .removeClass('btn-default')
+                .addClass('btn-danger')
+                .text('本戦を全て除外');
+        } else {
+            $('#final-toggle')
+                .removeClass('btn-danger')
+                .addClass('btn-default')
+                .text('本戦を全て選択');
+        }
+        if ($langs.length == $langs.filter(':checked').length) {
+            $('#lang-toggle')
+                .removeClass('btn-default')
+                .addClass('btn-danger')
+                .text('言語を全て除外');
+        } else {
+            $('#lang-toggle')
+                .removeClass('btn-danger')
+                .addClass('btn-default')
+                .text('言語を全て選択');
+        }
+    }
+    /* end of ここから旧バージョンのコピペ */
+
+    function parseRandom() {
+        var $random = $('#random input.form-control:enabled');
+        if ($random.length == 0) {
+            randomQuery = null;
+            return;
+        }
+
+        randomQuery = $random.val().trim().toLowerCase();
+        if ($('#random input[value=pattern]').is(':checked')) {
+            // そのまま持っておきます
+        } else if (randomQuery == 'nan') {
+            randomQuery = NaN;
+        } else if (randomQuery.match(/^\d+$/)) {
+            randomQuery = parseInt(randomQuery);
+        } else if (randomQuery == '') {
+            randomQuery = null;
+        } else {
+            // 不正値はどうしよう
+        }
+    }
+
+    function showCategories() {
+        var res = new Set();
+        $.each($('#filter-contests input:checked'), function(i, input) {
+            var name = input.name;
+            if (name == '') return;
+
+            res.add(name.substr(5));  // show-*
+        });
+        return res;
+    }
+
+    function showLanguages() {
+        var res = new Set();
+        $.each($('#filter-languages input:checked'), function(i, input) {
+            var name = input.name;
+            if (name == '') return;  // 'C++' などの親ボタン
+            res.add(this.parentElement.innerText.substr(1));
+        });
+        return res;
+    }
+
+    function tipEventHandlers() {
+        $('.cfg-reload').on('click', function() {
+            window.location.href = generateParam();
+        });
+    }
+
+    function showTips() {
+        lastTip = randomInt(TIPS.length);
+        var msg = TIPS[lastTip];
+        var tip = (
+            '<div id="tip" class="alert alert-default alert-dismissible" role="alert">'
+                + '<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">x</span></button>'
+                + '<span class="refresh fa fa-refresh" aria-hidden="true"></span>'
+                + '&nbsp;<span style=""><strong>Tips:</strong></span> <span id="tip-body">{0}</span>'
+                + '</div>'
+            // HTML を書きたくなるかもしれないので，エスケープは
+            // 必要に応じて済ませておいてください
+        ).format(msg);
+        $('#messages').append(tip);
+        tipEventHandlers();
+        $('#tip span.fa').on('click load', function() {
+            lastTip = (lastTip+1 + randomInt(TIPS.length-1)) % TIPS.length;
+            var msg = TIPS[lastTip];
+            $('#tip-body').html(msg);
+            tipEventHandlers();
+        });
+    }
+
+    function initVars() {
+        filterForTask = new TaskFilter();
+        filterForSubmission = new SubmissionFilter();
+        page = new Page();
+
+        memberList = {};
+        $.each($('#ac-count tbody>tr'), function(i, user) {
+            // var name = e(user.children[0].innerText.substr(1));  // ' rsk0315'
+            // Safari/iOS だと存在しないやつ（span.glyphicon の影響？）で
+            // 余分文字が入っていそうです？
+            var name = user.children[0].innerText.replace(/\W/g, '');
+            var kind = e(user.classList[0]);
+            if (debugMode) {
+                echoError(kind+':'+user.children[0].innerText);
+            }
+            // if (name.match(/\W/)) return;
+            if (name == '') return;  // ???
+            memberList[name] = kind;
+        });
+
+        getNames();
+
+        if (!(userName === '' && rivalNames.length === 0)) {
+            // /graph への href をはるよ
+            let href = '/graph?user='
+            href += ([userName].concat(rivalNames)).join(', ');
+            $('a[href="/graph"]').attr({href});
+        }
+    }
+
+    function initEventHandlers() {
+        restoreParams();
+
+        $('.tasks-per-page').click(function() {
+            page.numPerPage = parseInt($(this).text()) || $(this).text();
+            setLS('numPerPage', page.numPerPage);
+            $('.tasks-per-page.selected').removeClass('selected');
+            $(this).addClass('selected');
+            page.setPage(1);
+            draw();
+        });
+
+        $('#config-reload').on('click', function() {
+            var param = generateParam();
+            window.location.href = '/' + param;
+        });
+
+        $('#config-reset').click(function() {
+            window.location.href = '/';
+        });
+
+        var options = '';
+        var OPTION = '<option value="{0}">{0}</option>\n';
+        for (var point=100; point<=MAX_POINT; point+=100) {
+            // 50 点刻みのやつとかここに入れる必要ありますか？
+            options += OPTION.format(point);
+        }
+        $('#point-min').html(OPTION.format(0)+options);
+        $('#point-max').html(options+OPTION.format(1000000));
+
+        $('#point-min').selectpicker('val', filterForTask.lowerBound);
+        $('#point-max').selectpicker('val', filterForTask.upperBound);
+
+        $('.selectpicker').selectpicker('refresh');
+        $('#point-min').on('change', function() {
+            var min = ($('#point-min').val().replace(/\D/g, '') || '0');
+            filterForTask.lowerBound = parseInt(min);
+            filterTasks();
+            draw();
+        });
+        $('#point-max').on('change', function() {
+            var max = ($('#point-max').val().replace(/\D/g, '') || '1000000');
+            filterForTask.upperBound = parseInt(max);
+            filterTasks();
+            draw();
+        });
+        $('#users-sorted-by').on('change', function() {
+            drawSummary();
+        }).selectpicker('val', 'input');
+
+        $('input[name=include-partial]').change(function() {
+            filterForTask.includePartial = $(this).is(':checked');
+            filterTasks();
+            draw();
+        });
+        if (filterForTask.includePartial)
+            $('input[name=include-partial]').prop('checked', true);
+
+        $('input[name=show-as]').change(function() {
+            filterForTask.showForBeginners
+                = ($('input[name=show-as]:checked').val() == 'as-abc');
+
+            filterTasks();
+            draw();
+        });
+        $('input[name=show-as]').val([filterForTask.showForBeginners? 'as-abc':'as-arc']);
+
+        $('input[name=form-writer]').change(function() {
+            var pattern = $(this).val().replace(/[^\w|]/g, '');
+            filterForTask.writers
+                = (pattern? RegExp('^(?:'+pattern+')$', 'i'):null);
+
+            filterTasks();
+            draw();
+        });
+        if (filterForTask.writers)
+            $('input[name=form-writer]').val(regExpToPat(filterForTask.writers));
+
+        $('#filter-with-ac input').change(function() {
+            if ($(this).is(':checked')) {
+                filterForTask.hides[this.name] = true;
+            } else {
+                delete filterForTask.hides[this.name];
+            }
+            // filterTasks の後半だけでいい気がしますか？
+            // わかんないですけど，そうしない前提のコードな気がします
+            filterTasks();
+            draw();
+        });
+        $.each($('#filter-with-ac input'), function(i, input) {
+            if (filterForTask.hides[input.name])
+                input.checked = true;
+        });
+
+        $('#only-in-contests')
+            .prop('checked', filterForSubmission.onlyInContests)
+            .on('change', function() {
+                filterForSubmission.onlyInContests = $(this).is(':checked');
+                filterTasks();
+                draw();
+            });
+
+        $('#filter-contests input').change(function() {
+            propagateCheckbox($(this));
+            updateToggle();
+            filterForTask.category = showCategories();
+            filterTasks();
+            draw();
+        });
+        $.each($('#filter-contests input'), function(i, input) {
+            input.checked = filterForTask.category.has(input.name.substr(5));
+        });
+
+        $('#filter-languages input').change(function() {
+            propagateCheckbox($(this));
+            updateToggle();
+            filterForSubmission.languages = showLanguages();
+            filterTasks();
+            draw();
+        });
+
+        $('#qual-toggle').click(function() {
+            var $quals = $('ul input:checkbox').filter(function() {
+                return quals.has(this.name.substr(5));  // show-...
+            });
+            toggle($(this), $quals);
+            filterForTask.category = showCategories();
+            filterTasks();
+            draw();
+        });            
+
+        $('#final-toggle').click(function() {
+            var $finals = $('ul input:checkbox').filter(function() {
+                return finals.has(this.name.substr(5));
+            });
+            toggle($(this), $finals);
+            filterForTask.category = showCategories();
+            filterTasks();
+            draw();
+        });
+
+        $('#lang-toggle').click(function() {
+            var $langs = $('#filter-languages input:checkbox');
+            toggle($(this), $langs);
+            filterForSubmission.languages = showLanguages();
+            filterTasks();
+            draw();
+        });
+        var langs = filterForSubmission.languages;
+        if (langs === null) {
+            $('#filter-languages input:checkbox').prop('checked', true);
+        } else {
+            $.each($('#filter-languages input:checkbox'), function(i, input) {
+                if (!input.name) return;
+                input.checked
+                    = langs.has(input.parentElement.innerText.trim());
+            });
+        }
+
+        initCheckboxList($('#filter-contests'));
+        initCheckboxList($('#filter-languages'));        
+        updateToggle();
+
+        // ランダム選択
+        $('#random input').change(function() {
+            parseRandom();
+            filterTasks();
+            draw();
+        });
+        $('#random button').click(function() {
+            filterTasks();
+            draw();
+        });
+        $('#random input[type=radio]').click(function() {
+            $('#random .form-control, #random .btn')
+                .prop('disabled', true).removeClass('invalid');
+            $('#random-by-{0} input, #random-by-{0} .btn'.format($(this).val()))
+                .prop('disabled', false);
+        });
+        $('#random .form-control, #random .btn').prop('disabled', true);
+        $('#random input[type=radio][value=none]').prop('checked', true);
+        parseRandom();
+
+        // taskScreenName で絞り込み
+        $('#filter-task-screen-name input').change(function() {
+            var $ft = $('#filter-task-screen-name');
+            var $pat = $ft.children('input[name=pattern]');
+            var taskPattern = $pat.val();
+            var useAs = $ft.children('input[name=use-as]:checked').val();
+            $pat.removeClass('invalid');
+
+            filterForTask.taskName = taskPattern;
+            filterForTask.tp = useAs;
+            if (useAs == 'pattern') {
+                $pat.attr({placeholder: 'abc1*_?'});
+            } else if (useAs == 'regex') {
+                $pat.attr({placeholder: 'abc0(?:9[5-9]|1[0-4])_.'});
+            }
+
+            filterTasks();
+            draw();
+        });
+        $('#filter-task-screen-name input[name=pattern]').val(filterForTask.taskName);
+        $('#filter-task-screen-name input[name=use-as]').val([filterForTask.tp]);
+
+        // 日時指定まえ
+        $('input[name=date-from]').change(function() {
+            filterForSubmission.setAfter($(this).val());
+            filterTasks();
+            draw();
+        });
+        if (filterForSubmission.after > AGC001_STARTS) {
+            var tmp = new Date();
+            // タイムゾーンわからない．よくないことが起こる気がする
+            tmp.setTime((filterForSubmission.after+9*60*60) * 1000);
+            $('input[name=date-from]')
+                .val(tmp.toJSON().replace('T', ' ').replace(/\..+/, ''));
+        }
+        // 日時指定うしろ
+        $('input[name=date-to]').change(function() {
+            filterForSubmission.setBefore($(this).val());
+            filterTasks();
+            draw();
+        });
+        if (filterForSubmission.before < Infinity) {
+            var tmp = new Date();
+            // タイムゾーンわからない．よくないことが起こる気がする
+            tmp.setTime((filterForSubmission.before+9*60*60) * 1000);
+            $('input[name=date-to]')
+                .val(tmp.toJSON().replace('T', ' ').replace(/\..+/, ''));
+        }
+
+        // おほしさま
+        for (var i=0; i<FAV_COLORS.length; ++i) {
+            var color = FAV_COLORS[i];
+            var div = (
+                '<div id="fav-{0}" class="input-group mt-1">'
+                    + '<span class="input-group-addon fav-color" id="fav-label-{0}">'
+                    + '<img src="/public/img/icon/unfav.png" width="16" class="fav-preview">'
+                    + '</span>'
+                    + '<input class="form-control fav-label" data-target="{0}" placeholder="{1}">'
+                    + '</div>'
+            ).format(color, e(FAV_PLACEHOLDERS[i]));
+            $('#fav-star').append(div);
+        }
+        reloadFavColor();
+        reloadFavs();
+        rerenderFavs();
+        $('.fav-color').click(function() {
+            var v=this.id.substr(10);  // fav-label-...
+        // $('input[name=fav-color]').click(function() {
+        //     var v = $(this).val();
+            $('img.fav-preview').attr({src: '/public/img/icon/unfav.png'});
+            favColor = 'fav-'+v;
+            storeFavColor();
+            reloadFavs();
+            rerenderFavs();
+
+            // これ，fav-only のときだけでいいかなと思ってたんですが，
+            // 適用した色のお星さまになってほしいのでよくなかったです
+            filterTasks();
+            draw();
+        }).on('mouseover mouseout', function(ev) {
+            var img = $(this).children()[0];
+            if (img.src.match(/\/fav/)) return;
+            var color = this.id.substr(10);  // fav-label-...
+            if (ev.type == 'mouseover') {
+                img.src = '/public/img/icon/unfav-'+color+'.png';
+            } else /* if (ev.type == 'mouseout') */ {
+                img.src = '/public/img/icon/unfav.png';
+            }
+        });
+        $('input.fav-label').change(function() {
+            var key = 'fav-{0}-label'.format($(this).attr('data-target'));
+            var value = $(this).val();
+            setLS(key, value);
+        });
+        $('input[name=fav-only]').change(function() {
+            filterForTask.favOnly = $(this).is(':checked');
+            filterTasks();
+            draw();
+        });
+        filterForTask.favOnly = $('input[name=fav-only]').is(':checked');
+
+        $('input[name=zero-suppress]').change(function() {
+            drawSummary();
+        });
+
+        // Twitter
+        $('#tweet-button').click(function(ev) {
+            // pleaseWait('進捗表を画像に変換しています...');
+            // これどっちの方がわかりやすいんですかね
+            $(this).after('&nbsp;<img id="tweet-waiting" src="/public/img/icon/waiting-cycle.gif" width="18">');
+
+            // ev.preventDefault();
+            $('#tweet-form input[name=query]').val(generateParam());
+
+            // 非同期処理をやるんですよね？ 向こう側に submit まで任せます．
+            // $('#tweet-form input[name=img]').val(generateImage());
+            // $('#tweet-form').submit();
+
+            // と思ったんですけどそれは普通に不可能で，非同期を始めた時点で
+            // こっちに戻ってきて勝手に送信されてそう？
+
+            // それは以前は button を form の中に置いていたから？
+
+            var width = looseWidth('#rated-point');
+            html2canvas($('#rated-point')[0], {
+                width: width, logging: false
+            }).then(function(canvas) {
+                beautify(canvas, 254);
+
+                // 'data:image/png;base64,' ...
+                var b64 = canvas.toDataURL('image/png').substr(22);
+                $('#tweet-form input[name=img]').val(b64);
+                // thanksForWaiting();
+                $('#tweet-waiting').remove();
+                // $('#tweet-form').attr({target: '_blank'});
+                $('#tweet-form').submit();
+            });
+        }).prop('disabled', true);
+
+        // ユーザのストレスを最も大きく減らす機能です（主観）
+        // != と == を間違えて最もストレスを与える機能になってました :sorry:
+        $('#collapse-user input').keypress(function(ev) {
+            if (ev.key === undefined) {
+                // Safari きらい
+                if (ev.keyCode != KEYCODE_ENTER) return;
+            } else if (ev.key != 'Enter') {
+                return;
+            }
+            window.location.href = '/' + generateParam();
+        });
+        $('#collapse-filter input').keypress(function(ev) {
+           if (ev.key === undefined) {
+                // Safari きらい
+                if (ev.keyCode != KEYCODE_ENTER) return;
+            } else if (ev.key != 'Enter') {
+                return;
+            }
+            filterTasks();
+            draw();
+        });
+
+        showTips();
+
+        $('[data-toggle=tooltip]').tooltip();
+    }
+
+    function initTable() {
+        if (isEmptyObject(memberList)) return;
+        $('#task-table tr').append('<th style="width: 40%;">提出状況</th>');
+    }
+
+    function pointToColor(point) {
+        if (point <= 100) return 'gray';
+        if (point <= 200) return 'brown';
+        if (point <= 300) return 'green';
+        if (point <= 400) return 'cyan';
+        if (point <= 600) return 'blue';
+        if (point <= 800) return 'yellow';
+        if (point <= 1100) return 'orange';
+        if (point <= 1500) return 'red';
+        if (point <= 1900) return 'silver';
+        if (point <= 3000) return 'gold';
+        return 'unknown';
+    }
+
+    function writersHTML(writers) {
+        var userAOpen = '<a href="//atcoder.jp/users/{0}" target="_blank" class="username">';
+        var userSpanOpen = '<span {0}="{1}">';
+        var html = '';
+        for (var i in writers) {
+            var writerInfo = writers[i];
+            var name = writerInfo[0];
+            var color = writerInfo[1];
+            if (name == '') continue;
+
+            if (i > 0) html += ', ';
+
+            if (color === null) {
+                // 'other', 'anonymous', etc.
+                html += '<span>{0}</span>'.format(name);
+                continue;
+            }
+
+            html += userAOpen.format(name);
+            if (color == 'username') {
+                html += '<span>';
+                html += name;
+                html += '</span></a>';
+                continue;
+            }
+
+            if (writerInfo.length == 3) {
+                html += '<img src="/public/img/icon/{0}">&nbsp;'
+                    .format(writerInfo[2]);
+            }
+
+            if (color[0] == 'u') {
+                // user-*
+                html += userSpanOpen.format('class', color);
+            } else if (color[0] == 'c') {
+                // color:#*
+                html += userSpanOpen.format('style', color);
+            }
+            html += name + '</span></a>';
+        }
+        return html;
+    }
+
+    function taskClass(submissions) {
+        if (isEmptyObject(submissions)) return '';
+
+        var userRJed = false;
+        var rivalACed = false;
+        for (var user in submissions) {
+            var submission = submissions[user];
+            if (submission.result == 'CE') continue;
+
+            var accepted = (submission.result == 'AC');
+            if (isRival(user) && accepted) rivalACed = true;
+            if (!isRival(user)) {
+                if (accepted) return 'success';
+                userRJed = true;
+            }
+        }
+        if (rivalACed) return 'danger';
+        if (userRJed) return 'warning';
+        return '';
+    }
+
+    function submissionLink(submission) {
+        if (submission === undefined) return '';
+
+        var style = '';
+        if (submission.result != 'AC') {
+            // CE はないと仮定していて
+            style = 'warning';
+        } else if (memberList[submission.user_id] == 'user') {
+            style = 'success';
+        } else {
+            style = 'danger';
+        }
+        style = 'submission submission-'+style;
+
+        if (typeof submission.id != 'number') return '';
+        if (!submission.contest_id || submission.contest_id.match(/[^\w-]/))
+            return '';
+
+        var link = '//atcoder.jp/contests/{0}/submissions/{1}'
+            .format(submission.contest_id, submission.id);
+
+        return '<span class="{0}"><a href="{1}" target="_blank">{2}</a></span>'
+            .format(style, link, e(submission.user_id));
+    }
+
+    function taskName(taskScreenName) {
+        // 問題名は表示しない方がいいという需要があったら考えます．
+        if (! 'want to show task name') return '';
+
+        if (taskDetails[taskScreenName] === undefined)
+            return ' &#x2013; ???';
+
+        return ' &#x2013; ' + e(taskDetails[taskScreenName]['taskName']);
+    }
+
+    function drawTable(rows) {
+        $('#messages div.not-found').remove();
+
+        if (rows.length == 0) {
+            alertPopUp('該当項目がありません．', 'warning', 'not-found');
+        }
+
+        var html = '';
+        for (var i=0; i<rows.length; ++i) {
+            var task = rows[i];
+
+            // この時点で，興味のある提出以外は弾けているとします
+            var subm = data.submissions[task.taskScreenName];
+            var style = taskClass(subm);
+
+            html += '<tr class="{0}">'.format(task.taskScreenName);
+            html += '<td class="point point_{0}">{1}</td>'
+                .format(pointToColor(task.fullScore), task.fullScore);
+            html += '<td class="{0}">'.format(style);
+            html += (
+                '<img class="fav-btn-acscores" width="14" src="{0}"'
+                    + ' data-target="{1}">'
+            ).format(favSrc(task.taskScreenName), e(task.taskScreenName));
+            html += '&nbsp;';
+            html += '<a href="{0}" target="_blank">{1}: {2}{3}</a>'
+                .format(task.taskURL, task.contestTitle, task.taskChar,
+                        taskName(task.taskScreenName));
+            html += '</td>';
+
+            html += '<td class="{0}">'.format(style);
+            html += writersHTML(task.writers);
+            html += '</td>';
+
+            html += '<td class="{0}">{1}</td>'.format(style, task.partialScore || '-');
+
+            if (!isEmptyObject(memberList)) {
+                html += '<td class="{0}">'.format(style);
+                if (!isEmptyObject(subm)) {
+                    var appended = false;
+                    for (var name in memberList) {
+                        if (subm[name] === undefined) continue;
+                        if (appended) html += '&nbsp;';
+                        html += submissionLink(subm[name]);
+                        appended = true;
+                    }
+                }
+                html += '</td>';
+            }
+
+            html += '</tr>\n';
+        }
+
+        // まとめて追加した方が速そう？ 体感でそんな気がするだけかも
+        $('#task-table>tbody').html(html);
+        $('img.fav-btn-acscores').on('click', function() {
+            var name = $(this).attr('data-target');
+            var hasNow = toggleFav(name);
+            var $tr = $(this).parent().parent();
+            if (hasNow) {
+                this.src = '/public/img/icon/'+favColor+'.png';
+            } else {
+                this.src = '/public/img/icon/unfav.png';
+            }
+        }).on('mouseover mouseout', function(ev) {
+            if (this.src.match(/\/fav/)) return;
+            if (ev.type == 'mouseover') {
+                this.src = '/public/img/icon/un'+favColor+'.png';
+            } else /* if (ev.type == 'mouseout') */ {
+                this.src = '/public/img/icon/unfav.png';
+            }
+        });
+    }
+
+    function draw() {
+        if (data === undefined) return;
+
+        if (!summaryUpToDate) drawSummary();
+        var npp = page.numPerPage;
+        if (npp === 'Infinity') {
+            numPages = 1;
+            npp = Infinity;
+        } else if (npp === BY_POINT) {
+            var $th = $('#rated-point th');
+            var $td0 = $('#rated-point tbody>tr:first-child td');
+            numPages = $th.length-2;
+            // console.log(page.page);
+            npp = parseInt($td0[page.page+1].innerText);
+        } else {
+            // Math.ceil でよくない？
+            numPages = Math.floor((data.tasks.length+npp-1)/npp);
+        }
+        if (filterForTask.favOnly) numPages = 1;
+
+        page.page = clamp(page.page, 1, numPages);
+        var left = page.getBegin();
+        var right = Math.min(left+npp, data.tasks.length);
+        if (filterForTask.favOnly) {
+            left = 0;
+            right = data.tasks.length;
+        }
+        var rows = data.tasks.slice(left, right);
+        // if (summaryUpdated) drawSummary();
+        drawTable(rows);
+        drawPagination();
+    }
+
+    function filterSubmissions() {
+        activeSubmissions = {};
+        summaryUpToDate = false;
+        for (var taskScreenName in submissions) {
+            for (var i in submissions[taskScreenName]) {
+                var submission = submissions[taskScreenName][i];
+                if (!activeTaskNameSet.has(submission.problem_id))
+                    continue;
+
+                if (submission.result == 'CE')
+                    continue;
+
+                // 提出履歴用のフィルタで弾くのも忘れずに．
+                if (!filterForSubmission.match(submission))
+                    continue;
+
+                // 前みたいに [問題ID][提出者] で提出履歴にアクセスできるようにする
+                // 最新の提出以外は消していいので，適宜やる．
+                var problemID = taskScreenName;
+                var userID = submission.user_id;
+
+                if (activeSubmissions[problemID] === undefined) {
+                    activeSubmissions[problemID] = {};
+                    activeSubmissions[problemID][userID] = submission;
+                } else if (activeSubmissions[problemID][userID] === undefined) {
+                    activeSubmissions[problemID][userID] = submission;
+                } else {
+                    var prevSubmission = activeSubmissions[problemID][userID];
+                    var accepted = (submission.result == 'AC');
+                    var prevAccepted = (prevSubmission.result == 'AC');
+
+                    if (prevAccepted && !accepted) continue;
+                    if (prevAccepted == accepted) {
+                        if (prevSubmission.epoch_second > submission.epoch_second)
+                            // 状況が同じなら最新のものを出すようにします
+                            continue;
+                    }                        
+
+                    activeSubmissions[problemID][userID] = submission;
+                }
+            }
+        }
+    }
+
+    function filterTasks() {
+        filterForTask.resetTaskRegExp();
+
+        activeTasks = [];
+        activeTaskNameSet = new Set();
+        pointTable = {};
+        pointTable['whole'] = {};
+        ratedPoint = {};
+        ratedPoint['whole'] = 0;
+        filteredTasks = 0;
+
+        for (var i=0; i<tasks.length; ++i) {
+            var task = tasks[i];
+            if (!filterForTask.match(task)) continue;
+
+            activeTasks.push(task);
+            activeTaskNameSet.add(task.taskScreenName);
+            ratedPoint['whole'] += task.fullScore;
+            if (pointTable['whole'][task.fullScore] === undefined) {
+                pointTable['whole'][task.fullScore] = 1;
+            } else {
+                ++pointTable['whole'][task.fullScore];
+            }
+        }
+
+        // これは caller がやって．いいえ，callee がやってください
+        // 問題を絞った時点で提出も絞られる必要があるので．
+        filterSubmissions();
+
+        // AC 状況による絞り込みは，一度提出を絞り込んだ後にやります．
+        // じゃなくてもいいんですが，分岐が面倒になるので．
+        // これは本末転倒なんですが，そのために面倒になってませんか？
+        // あれ？ これ filterSubmissions() でやればよくないですか？
+        // 関数名的にはアになるんですが，現状が妥当かはわからない．
+        if (!isEmptyObject(filterForTask.hides)) {
+            var wholeTasks = activeTasks;
+            activeTasks = [];
+            pointTable = {};
+            pointTable['whole'] = {};
+            for (var i=0; i<wholeTasks.length; ++i) {
+                var task = wholeTasks[i];
+                if (!filterForTask.matchWithSubmissions(task)) {
+                    if (!filterForTask.hides['count']) {
+                        // activeSubmissions に入っている問題は
+                        // summary で考慮されます．
+                        ratedPoint['whole'] -= task.fullScore;
+
+                        // これだと 0 になったエントリを消す手間がいるの
+                        // ratedPoint['whole'] -= task.fullScore;
+                        // --pointTable['whole'][task.fullScore];
+                        delete activeSubmissions[task.taskScreenName];
+                    } else {
+                        if (pointTable['whole'][task.fullScore] === undefined) {
+                            pointTable['whole'][task.fullScore] = 1;
+                        } else {
+                            ++pointTable['whole'][task.fullScore];
+                        }
+                        ++filteredTasks;
+                    }
+
+                    continue;
+                }
+
+                if (pointTable['whole'][task.fullScore] === undefined) {
+                    pointTable['whole'][task.fullScore] = 1;
+                } else {
+                    ++pointTable['whole'][task.fullScore];
+                }
+
+                activeTasks.push(task);
+            }
+        }
+
+        if (randomQuery === null) {
+            data = new Data(activeTasks, activeSubmissions);
+            return;
+        }
+
+        // ランダムにやるやつをします
+        var randomIndex = new Set();
+        if (typeof randomQuery == 'string') {
+            var re = RegExp($('#random-by-pattern input').attr('pattern'));
+            if (!randomQuery.match(re)) {
+                // XXX だめだよーってやつを表示したいです
+                $('#random-by-pattern input').addClass('invalid');
+                data = new Data(activeTasks, activeSubmissions);
+                return;
+            } else {
+                $('#random-by-pattern input').removeClass('invalid');
+            }
+            var points = randomQuery.split(/-/g);
+            points.forEach(function(e) {
+                var lb, ub;
+                if (e[0] == '[') {
+                    [lb, ub] = e.match(/(\d+):(\d+)/).slice(1).map(e => parseInt(e));
+                    if (lb > ub) [lb, ub] = [ub, lb];
+                } else {
+                    lb = ub = parseInt(e);
+                }
+
+                var lbIdx = lowerBound(activeTasks, lb);
+                var ubIdx = lowerBound(activeTasks, ub+1);
+                if (lbIdx == ubIdx) return;
+
+                // は？
+                var candidates = [];
+                for (var i=lbIdx; i<ubIdx; ++i)
+                    if (!randomIndex.has(i)) candidates.push(i);
+
+                randomIndex.add(candidates[randomInt(candidates.length)]);
+            });
+
+            // や，その割り当てが存在するのにそれを出せないときが
+            // Successful hacking attempt のはずなんだよね
+            // つまり，[100, 200] って問題があったとして，
+            // * [100:200]-200 は (100, 200) で可能なのに
+            //   最初に 200 を割り当てると失敗するから hack 成立
+            // * 150 はどうやっても不可能なので hack 不成立
+            // で，それが存在することがわかるならそれを出せばいいはずで，
+            // このお遊びは成り立たない（むむむ）
+            // if (randomIndex.size < points.length) {
+            //     $('#random-hacked').css({
+            //         display: '',
+            //         color: 'red',
+            //         'font-weight': 'bold',
+            //     }).text('Successful hacking attempt');
+            // } else {
+            //     $('#random-hacked').css({display: 'none'}).text('');
+            // }
+        } else if (isNaN(randomQuery)) {
+            // NaN 問を選択します
+            randomIndex.add(activeTasks.length-1);
+        } else if (randomQuery >= activeTasks.length) {
+            data = new Data(activeTasks, activeSubmissions);
+            return;
+        } else {
+            var range = [];
+            var n = activeTasks.length;
+            for (var i=0; i<n; ++i) range.push(i);
+            for (var i=0; i<randomQuery; ++i) {
+                var j = randomInt(n-i);
+                randomIndex.add(range[j]);
+                range[j] = range[n-i-1];
+            }
+        }
+
+        var wholeTasks = activeTasks;
+        activeTasks = [];
+        pointTable = {};
+        pointTable['whole'] = {};
+        for (var i=0; i<wholeTasks.length; ++i) {
+            var task = wholeTasks[i];
+            if (!randomIndex.has(i)) {
+                ratedPoint['whole'] -= task.fullScore;
+                delete activeSubmissions[task.taskScreenName];
+                continue;
+            }
+
+            if (pointTable['whole'][task.fullScore] === undefined) {
+                pointTable['whole'][task.fullScore] = 1;
+            } else {
+                ++pointTable['whole'][task.fullScore];
+            }
+
+            activeTasks.push(task);
+        }
+
+        data = new Data(activeTasks, activeSubmissions);
+    }
+
+    function getSubmissions(users) {
+        let remains = users.length;
+        let submissions = [];
+        let dfd = $.Deferred();
+
+        // こどふぉで無限に Hack されそう
+        if (users.length === 0) {
+            dfd.resolve([]);
+        }
+
+        for (let user of users) {
+            $.ajax({
+                url: `https://kenkoooo.com/atcoder/atcoder-api/results?user=${user}`,
+            }).then(function(data) {
+                // XXX ここ "error" とかが返ってくるとこわれそう．
+                submissions = submissions.concat(data);
+                if (--remains == 0) {
+                    dfd.resolve(submissions);
+                }
+            });
+        }
+        return dfd.promise();
+    }
+
+    /* main */
+    // なんでクライアントサイドでやろうとしたのか忘れました．
+    // 思い出すまではサーバサイドに任せます．
+    // 思い出しました．たぶんページャの導入のためです
+
+    /* 未来のえびちゃんへ */
+    // まず，/tasks.json を叩くのと同時に kenkoooo さんの API も
+    // 叩きます．で，taskSet を見ながら興味のある提出のみに絞ります．
+    // これを submissions へ．
+    // 問題と同様に提出も言語などでフィルタを掛けます．
+    // そのうち提出日時で絞るのも入れる予定なのでよしなに．<- done
+    // で，AC 未表示にした場合は ac-count の AC 数はどうしますか？
+    // 0 にしてもいいですかね．もし数えるなら，data.tasks などには
+    // 入れないで，数だけ別で持っておくようにしましょう．
+
+    if ($.url($(location).attr('search')).param().debug == 'true')
+        debugMode = true;
+
+    initVars();
+    initEventHandlers();
+    initTable();
+
+    $('#tweet-button').prop('disabled', true);
+    if (!isEmptyObject(memberList)) {
+        pleaseWait('問題と提出の一覧を取得しています...');
+    } else {
+        // 両方に $.ajax を飛ばしていますが，内部的には
+        // 提出の一覧は取得していないので嘘はついてないですよね
+        pleaseWait('問題の一覧を取得しています...');
+    }
+
+    $.when(
+        $.ajax(TASKS_URI), $.ajax(TASKS_OFFICIAL_URI),
+        getSubmissions(Object.keys(memberList)),
+    ).done(function(tasksData, tasksOfficialData, body) {
+        // console.log(body);
+
+        tasks = tasksData[0];
+        taskSet = new Set();
+        for (let task of tasks) {
+            taskSet.add(task.taskScreenName);
+            taskScore[task.taskScreenName] = task.fullScore;
+        }
+
+        taskDetails = tasksOfficialData[0];
+
+        if (typeof body == 'string' && body == 'error') {
+            // ここ，よくなくて，存在しないユーザのみの場合にこわれそう
+            // AP-API はそういう場合に "There was an internal server error." と
+            // 言ってくるんですが，なぜかこっちで見ると "error" になってしまう
+            var foundUser = Object.keys(userInfo).filter(
+                k => (userInfo[k].error !== 'user not found')
+            );
+            if (foundUser.length > 0) {
+                alertPopUp('API の取得に失敗しました... AtCoder Problems がダウンしているかもしれません．',
+                           'danger', 'api-failed');
+            }
+            filterTasks();
+            draw();
+
+            thanksForWaiting();
+            // この場合ってツイート機能は無効のままでもいいですよね
+            return;
+        }
+
+        submissions = {};
+        for (var i in body) {
+            var submission = body[i];
+            var taskScreenName = submission.problem_id;
+            var userScreenName = submission.user_id;
+            if (!taskSet.has(taskScreenName)) continue;
+
+            // これ，Problems が一時期不調だったときに追加したやつですか？
+            // 本質ではなさそうなので残しておきます
+            if (submission.result === 'AC' && submission.point == 0) {
+                // これなに．
+                // マラソン系だと AC が満点とは限らなかったりしますけど
+                // そういう問題は存在しないと見ていいですか？
+                // とりあえずそうします．
+                submission.point = taskScore[submission.problem_id];
+            }
+
+            if (submissions[taskScreenName] === undefined) {
+                submissions[taskScreenName] = [submission];
+            } else {
+                submissions[taskScreenName].push(submission);
+            }
+        }
+
+        filterTasks();
+        draw();
+        thanksForWaiting();
+        $('#tweet-button').prop('disabled', false);
+    });
+});

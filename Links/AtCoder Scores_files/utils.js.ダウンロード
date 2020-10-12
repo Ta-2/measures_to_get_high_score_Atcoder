@@ -1,0 +1,380 @@
+'use strict';
+// based on https://beta.atcoder.jp/public/js/utils.js?v=201810261951
+
+/* escape */
+function escapeHTML(s) {
+    return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+function e(s) { return escapeHTML(s); }
+
+/* patterns */
+function regExpToPat(re) {
+    // ここでは /^(?:...|...|...)$/i みたいなパターンを想定しています．
+    // それしか使わないので．
+    return re.toString().slice(5, -4);
+}
+function patToRegExp(pat) {
+    pat = pat
+        .replace(/[-\/\\^+.()|[\]{}]/g, '\\$&')
+        .replace(/\?/g, '.')
+        .replace(/\*/g, '.*');
+    return new RegExp(pat);
+}
+function makeRegExp(pat, as) {
+    var re = null;
+    if (as == 'pattern') {
+        re = patToRegExp(pat);
+    } else if (as == 'regex') {
+        try {
+            re = new RegExp(pat);
+        } catch (e) {
+            $('#filter-task-screen-name input[name=pattern]').addClass('invalid');
+            return null;
+        }
+    }
+    if (re.toString() == '/(?:)/') return null;
+    return re;
+}
+
+/* object */
+function isEmptyObject(obj) {
+    for (var key in obj)
+        if (obj.hasOwnProperty(key)) return false;
+    return true;
+
+};
+
+/* random */
+function randomInt(ub) {
+    // [0, ub-1]
+    return Math.floor(Math.random() * Math.floor(ub));
+}
+
+/* formatter */
+if (typeof String.prototype.format === 'undefined') {
+    String.prototype.format = function(arg) {
+        var repl_fn = undefined;
+        if (typeof arg == 'object') {
+            repl_fn = function(m, k) { return arg[k]; };
+        } else {
+            var args = arguments;
+            repl_fn = function(m, k) { return args[parseInt(k)]; };
+        }
+        return this.replace(/\{(\w+)\}/g, repl_fn);
+    }
+}
+
+/* array conversions */
+function arrayToSet(a) {
+    var s = new Set();
+    for (var i in a) s.add(a[i]);
+    return s;
+}
+function setToArray(s) {
+    var a = [];
+    s.forEach(function(val) { a.push(val); });
+    return a;
+}
+
+/* sets */
+function equalSet(s, t) {
+    if (s.size != t.size) return false;
+    try {
+        s.forEach(function(el) {
+            if (!t.has(el)) throw false;
+        });
+    } catch (e) {
+        // 雰囲気で JS を書いていたんですが，
+        // try { ... } catch { ... }
+        // と書くと，CentOS/Firefox では動いて iOS/Safari では
+        // 動かなくて，わけがわからず時間を溶かします．
+        // array を作って sort して == で比較とかの方がよかったかなぁ
+        return false;
+    }
+    return true;
+}
+
+/* cookie */
+var COOKIE_EXPIRES = 10000;
+function setCookie(key, val, expires) {
+    Cookies.set(key, val, { expires: expires || COOKIE_EXPIRES});
+}
+function getCookie(key) {
+    return Cookies.getJSON(key);
+}
+function delCookie(key) {
+    Cookies.remove(key);
+}
+
+/* local storage */
+function setLS(key, val) {
+    localStorage.setItem(key, JSON.stringify(val));
+}
+function getLS(key) {
+    return JSON.parse(localStorage.getItem(key) || "null");
+}
+function delLS(key) {
+    localStorage.removeItem(key);
+}
+
+/* user faves */
+var favSet = new Set();
+var favColor = 'fav-yellow';
+function setCookieFav(favs) {
+    setCookie(favColor, favs);
+}
+function reloadFavColor() {
+    favColor = 'fav-yellow';  // valid な値が見つからなければこれにします
+    var tmp = getLS('fav-color');
+    for (var i=0; i<FAV_COLORS.length; ++i) {
+        var color = FAV_COLORS[i].toLowerCase();
+        if (tmp == 'fav-'+color) favColor = tmp;
+        var label = getLS('fav-'+color+'-label') || '';
+        $('input.fav-label[data-target='+color+']').val(label);
+    }
+    $('input[name=fav-color]').val([favColor.substr(4)]);
+}
+function storeFavColor() {
+    setLS('fav-color', favColor);
+}
+function rerenderFavs() {
+    if (!favColor.match(/^fav-\w+$/)) reloadFavColor();
+    $('#'+favColor+' img').attr({src: '/public/img/icon/'+favColor+'.png'});
+}
+function storeFavs() {
+    setLS(favColor, setToArray(favSet));
+    // if (favColor == 'fav-yellow') {
+    //     delLS('fav');
+    // }
+}
+function reloadFavs() {
+    favSet = arrayToSet(getLS(favColor) || []);
+    var ck = getCookie(favColor);
+    if (ck) {
+        for (var i in ck) favSet.add(ck[i]);
+        storeFavs();
+        delCookie(favColor);
+    }
+    if (favColor == 'fav-yellow') {
+        // 元々の fav と統合したいです．
+        var oldFavSet = arrayToSet(getLS('fav') || []);
+
+        // 要素数 n の Set の要素たちを，要素数 m の Set に合わせるには
+        // O(n T(n+m)) かかりますよね．T(n) は要素数 n の Set に新しく
+        // 要素を追加するのにかかる時間です．
+        // 調べたところ，JS の Set は sublinear ということだけが規定されてて
+        // ハッシュも木もありうるらしいです．
+        // swap の計算時間は O(1) だと思うんですが，別に要素数を大きい方に
+        // 挿入して O(min(n, m) T(n+m)) にしなくてもいいですよね．
+        // このコメントの行数があれば書ける程度の処理でしたね．
+        oldFavSet.forEach(function(el) {
+            favSet.add(el);
+        });
+
+        // どうせ，一度 fav-yellow に入れたら fav を空にするという処理をすれば
+        // 上のやつは O(1) で終わるはずです．
+        // fav-yellow で消したのに fav で消えてない，となるのが面倒ですが，
+        // その問題が起こる前に beta を正式にすれば解決できますか？（おいおい）
+
+        // え，正しく処理されてないらしいんですけど（申し訳ない）
+    }
+}
+function toggleFav(key) {
+    reloadFavs();
+    var res = !favSet.has(key);
+    if (!res) {
+        // 頭こわれる
+        favSet.delete(key);
+    } else {
+        favSet.add(key);
+    }
+    storeFavs();
+    return res;  // .has(key) now
+}
+function favSrc(taskScreenName) {
+    if (favSet.has(taskScreenName))
+        return '/public/img/icon/{0}.png'.format(favColor);
+    return '/public/img/icon/unfav.png';
+}
+// function favBtn(dataName) {
+//     return $('<img>').attr({
+//         class: 'fav-btn-acscores',
+//         src: '/img/icon/{0}.png'.format(favSet.has(dataName)? favColor:'unfav'),
+//         width: '14px',
+//         style: 'margin-bottom: 4px',
+//         'data-name': escapeHTML(dataName),
+//     }).click(function() {
+//         var hasIt = toggleFav(dataName);
+//         this.src = '/img/icon/{0}fav.png'.format(hasIt? '':'un');
+//         // tr>td>img
+//         var $tr = $(this).parent().parent();
+//         var showFavOnly = $('input[name=show_fav_only]').is(':checked');
+//         if (hasIt) {
+//             $tr.removeClass('unfav');
+//             $tr.css({display: ''});
+//         } else {
+//             $tr.addClass('unfav');
+//             if (showFavOnly) {
+//                 // 執行猶予
+//                 // $tr.css({display: 'none'});
+//             }
+//         }
+//     });
+// }
+
+/* dates */
+function dateToSec(dateString) {
+    if (dateString === undefined) return undefined;
+
+    var match = dateString.match(DATE_RE);
+    if (match === null) return undefined;
+
+    // YYYY-mm-dd HH:MM だとタイムゾーンがこわれる ??? ので
+    // こんなことをしているのですが，絶対マシな解決法が存在しますよね
+    // ??? あれれ，こわれていませんが
+    // や，嘘で，空白以降があるかどうかで変わるのか ???
+    for (var i=1; i<=3; ++i)
+        if (match[i] === undefined) match[i] = '01';
+    for (var i=4; i<=6; ++i)
+        if (match[i] === undefined) match[i] = '00';
+    for (var i=2; i<=6; ++i)
+        if (match[i].length == 1)
+            match[i] = '0' + match[i];
+
+    dateString = '{1}-{2}-{3}T{4}:{5}:{6}+09:00'.format(match);
+
+    var tmp = new Date(dateString);
+    // var tmp = new Date(dateString);
+    if (tmp.toString() == 'Invalid Date') {
+        echoError('Invalid Date: ' + dateString);
+        return undefined;
+    }
+ 
+    return Math.floor(tmp.getTime() / 1000);
+}
+
+/* messages */
+function alertPopUp(msg, type, class_) {
+    if (typeof type != 'string' || !type.match(/^(danger|warning)$/))
+        type = 'danger';
+
+    var pop = (
+        '<div class="alert alert-{0} alert-dismissible {1}" role="alert">'
+            + '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>'
+            + '<button class="close" type="button" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">x</span></button>'
+            + '&nbsp;{2}'
+            + '</div>'
+    ).format(type, class_, e(msg));
+
+    $('#messages').append(pop);
+}
+function pleaseWait(msg='') {
+    var pop = (
+        '<div class="alert alert-default waiting" role="alert">'
+            + '<img style="vertical-align: text-bottom" src="/public/img/icon/waiting-cycle.gif" width="18">&nbsp;{0}'
+            + '</div>'
+    ).format(e(msg));
+
+    $('#messages').append(pop);
+}
+function thanksForWaiting() {
+    $('div.waiting').remove();
+}
+
+/* bounded values */
+function clamp(v, lo, hi) {
+    // assert(lo <= hi);
+    return Math.min(hi, Math.max(lo, v));
+}
+
+/* debug */
+function echoError(any) {
+    $('#debug').removeClass('hidden');
+    var str;
+    if (any === undefined) {
+        str = 'undefined';
+    } else if (any === null) {
+        str = 'null';
+    } else {
+        str = any.toString();
+    }
+    $('#debug').append(e(str)+'\n');
+}
+
+/* time */
+function getCurrentTime() {
+    return moment(new Date());
+}
+
+var clarCountName = 'clar_count';
+var lastUpdateName = 'last_update';
+var lastReadName = 'last_read';
+
+/* badge */
+function updateMiniBadge() {
+    var count = 0;
+    count += getLS(clarCountName) || 0;
+    // 他の項目が通知を出すようになったらここら辺に
+
+    if (count) {
+        $('.mini-badge').removeClass('hidden').text(count);
+    } else {
+        $('.mini-badge').addClass('hidden').text('');
+    }
+}
+
+/* clar */
+function updateClarBadge() {
+    const CLAR_INTERVAL = 5*60*1000;  // for release
+    // const CLAR_INTERVAL = 30*1000;  // for debug
+
+    if (typeof clarRead !== 'undefined') {
+        var curTime = getCurrentTime();
+        setLS(clarCountName, 0);
+        setLS(lastReadName, curTime.format('YYYY-MM-DD HH:mm:ssZZ'));
+    }
+
+    function updateBadge() {
+        var clarCount = getLS(clarCountName) || 0;
+        $('#clar-badge').text(clarCount? clarCount:'');
+        updateMiniBadge();
+    }
+
+    function updateClarCount() {
+        var pkey = getLS('private_clar') || [];
+        var clarURI = '/clar' + (pkey? '?pkey='+pkey.join(','):'');
+        var lastUpdate = moment(getLS(lastUpdateName) || 0);
+        var curTime = getCurrentTime();
+        if (curTime.diff(lastUpdate) >= CLAR_INTERVAL) {
+            var lastRead = moment(getLS(lastReadName) || 0);
+            // console.log(curTime.format('YYYY-MM-DD HH:mm:ssZZ'));
+            $.ajax(clarURI).done(function(data) {
+                var clarCount = 0;
+                for (var i in data) {
+                    var m = moment(data[i].d);
+                    var d = lastRead.diff(m);
+                    if (d < 0) ++clarCount;
+                }
+                setLS(clarCountName, clarCount);
+                updateBadge();
+            });
+            setLS(lastUpdateName, curTime.format('YYYY-MM-DD HH:mm:ssZZ'));
+        } else {
+            updateBadge();
+        }
+    }
+
+    var timer;
+    timer = setInterval(updateClarCount, 1000);
+}
+
+$(function() {
+    if ($('#clar-badge').length) {
+        updateClarBadge();
+    }
+});

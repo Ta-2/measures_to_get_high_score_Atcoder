@@ -1,0 +1,9 @@
+.tasks-per-page {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.tasks-per-page.selected {
+    color: black;
+    font-weight: bold;
+}

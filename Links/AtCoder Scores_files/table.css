@@ -1,0 +1,37 @@
+.point {font-weight:bold; text-align:center;}
+
+/* 100 */
+.point_gray{background-color:rgba(230, 230, 230, 1);}
+/* 200 */
+.point_brown{background-color:rgba(226, 226, 190, 1);}
+/* 300 */
+.point_green{background-color:rgba(206, 246, 206, 1);}
+/* 400 */
+.point_cyan{background-color:rgba(206, 236, 245, 1);}
+/* 500--600 */
+.point_blue{background-color:rgba(206, 216, 246, 1);}
+/* 700--800 */
+.point_yellow{background-color:rgba(245, 246, 206, 1);}
+/* 900--1100 */
+.point_orange{background-color:rgba(245, 227, 206, 1);}
+/* 1200--1500 */
+.point_red{background-color:rgba(245, 206, 206, 1);}
+/* 1600--1900 */
+.point_silver{background-color:rgba(230, 230, 230, 1); color:rgba(246, 106, 106, 1);}
+/* 2000--- */
+.point_gold{background-color:rgba(226, 226, 190, 1); color:rgba(246, 106, 106, 1);}
+/* ...otherwise? */
+.point_tsurai{background-color:rgba(246, 106, 106, 1); color:rgba(226, 226, 190, 1);}
+
+table {
+    table-layout: auto;
+    width: 150%;
+}
+
+.table-responsive > .table > tbody > tr > td {
+    white-space: normal;
+}
+
+#rated-point td, #ac-count td {
+    white-space: nowrap;
+}
