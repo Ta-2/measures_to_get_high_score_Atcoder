@@ -9,7 +9,7 @@ int main(){
     std::string ans = "";
 
     //大きい位から順にansへ入れる
-    while(n > 0){
+    while(n){
         --n;
         char c = (n % 26) + 'a';
         ans += c;
