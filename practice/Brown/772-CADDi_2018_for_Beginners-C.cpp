@@ -5,6 +5,7 @@
  * ŽÀÛ‚É‚ÍA(‚´‚Á‚­‚èŒ¾‚¤‚Æ)gcd^N <= P‚ð–ž‚½‚·Å‘å‚Ìgcd‚ð‹‚ß‚é–â‘è
  *
  * ’ˆÓ“_‚ÍAP‚ªgcd‚ÅŠ„‚èØ‚ê‚éðŒ‚ðŽç‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©
+ *
 */
 
 #include <iostream>
