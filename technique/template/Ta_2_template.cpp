@@ -1,8 +1,6 @@
 //------------ヘッダーインクルード------------
 #include <stdio.h>
 #include <stdarg.h>
-#include <cmath>
-#include <iomanip>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -35,43 +33,30 @@ typedef long long ll;
 #define br co "" en
 #define pr(value) ","<<#value<<": "<<value
 #define sn(value) #value,value
-#define setpre(n) fixed<<setprecision(n)<<
 
 template<class Type>
 void print_value(string name, Type value){co name << ":" << value;}
 #define pri(value) print_value(sn(value))
 
 template<class Type>
-void print_value2(string name, Type value, int flag){
+void print_value2(string name, Type value){
   int num = 0;
-  if(flag == 0){
-    fe(i, value)co name << "[" << num++ << "]:"  << i << ", ";
-    br;
-  }
-  else fe(i, value)co i en;
+  fe(i, value)co name << "[" << num++ << "]:"  << i << ", ";
 }
-#define pri2(Type, value, flag) print_value2<Type>(sn(value), (flag))
+#define pri2(Type, value) print_value2<Type>(sn(value))
 //------------main------------
 
 int main(){
   v(int) a(3);
   fe(i, a) co i en;
   int i = 0;
-  double pi = 3.1415926535897932384626433832795;
   pri(i);
   
   int num = 0;
   vector<int> array(5);
   fe(&i, array)i = num++;
   fe(i, array)co i en;
-  
-  co "pri2: 0" en;
-  pri2(vector<int>, array, 0);
-  co "pri2: 1" en;
-  pri2(vector<int>, array, 1);
-  
-  co pi en;
-  co setpre(15) pi en;
+  pri2(vector<int>, array);
   
   rep(j, 5){co j en;}
   rep2(i, 5, 10)co i en;
