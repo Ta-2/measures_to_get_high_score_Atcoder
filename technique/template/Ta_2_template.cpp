@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 //#include <pair>
@@ -33,6 +34,7 @@ typedef long long ll;
 #define br co "" en
 #define pr(value) ","<<#value<<": "<<value
 #define sn(value) #value,value
+#define setpri(n) fixed << setprecision(3) << 
 
 template<class Type>
 void print_value(string name, Type value){co name << ":" << value;}
@@ -47,6 +49,7 @@ void print_value2(string name, Type value){
 //------------main------------
 
 int main(){
+  double pi = 3.14192376347815461965463431;
   v(int) a(3);
   fe(i, a) co i en;
   int i = 0;
@@ -61,6 +64,8 @@ int main(){
   rep(j, 5){co j en;}
   rep2(i, 5, 10)co i en;
   repr(i, 5)co i en;
+  
+  co setri(15) pi en;
   
   return 0;
 }
