@@ -6,126 +6,135 @@
  *
 */
 
-//#define _GLIBCXX_DEBUG   <- debug
-#include <iostream>
 #include <vector>
 #include <queue>
-using namespace std;
-
-//無限大を表す定数
-constexpr long long inf  = (long long)1e18 + 1;
-
-//最大値更新関数
-template<typename T1, typename T2>
-inline bool chmax(T1 &a, T2 b) { return a < b && (a = b, true); }
-
+#include <numeric>
 
 /*----------ここからDijkstra法の実装----------*/
 
-//辺の構造体
-struct edge{
-    long long to;   //行き先の頂点
-    long long time; //toに行くのにかかる時間
-};
-
-class graph{
+template <typename Ty>
+class Graph {
 private:
-    vector<vector<edge>> G; //隣接リスト
-                            //G[i] = (j, time) -> 頂点iからjに時間timeで進める
+    //無限大を表す定数
+    const Ty INF = std::numeric_limits<Ty>::max();
+
+    //辺の構造体
+    struct Edge{
+        Ty to;   //行き先の頂点
+        Ty time; //toに行くのにかかる時間
+    };
+
+    //隣接リスト: G[i] = (j, time) -> 頂点iからjに時間timeで進める
+    std::vector<std::vector<Edge>> G;
 
 public:
-    vector<long long> d;    //最短時間の格納
+    //最短時間の格納
+    std::vector<Ty> d;
 
-//コンストラクタ
-    graph(long long n) : G(n), d(n, inf){}
+    //コンストラクタ
+    Graph(Ty n): G(n), d(n, INF) {}
 
-//頂点sから頂点tへの時間timeの辺を張る
-    void add_edge(long long _s, long long _to, long long _time);
+    //頂点sから頂点tへの時間timeの辺を張る
+    void AddEdge(Ty _s, Ty _to, Ty _time) {
+        Edge E;
+        E.to = _to;
+        E.time = _time;
 
-//頂点sから各頂点への最短時間の探索(ダイクストラ法)
-    void dijkstra(long long s);
-};
+        //グラフの_s番目に(_to, _time)をpush_backする
+        G[_s].push_back(E);
 
-void graph::add_edge(long long _s, long long _to, long long _time){
-    edge E;
-    E.to = _to;
-    E.time = _time;
-    G[_s].push_back(E);     //グラフの_s番目に(_to, _time)をpush_backする
-
-    return;
-}
-
-void graph::dijkstra(long long s){
-    d[s] = 0;               //頂点s(始点)までの最短時間を0に初期化する
-
-    priority_queue
-    < pair<long long, long long>,           //要素の型
-      vector<pair<long long, long long>>,   //要素のコンテナ
-      greater<pair<long long, long long>> > //要素の比較関数
-      que;
-
-    que.push(pair<long long, long long>(d[s], s));  //(time, to)の形をしているので注意
-
-    while(!que.empty()){
-        pair<long long, long long> p = que.top();
-        que.pop();
-
-        long long v = p.second;
-
-        for(auto &x : G[v]){
-            if(d[x.to] > d[v] + x.time){    //(*1)参照
-
-                //頂点vから向かって頂点x.toに着く最短時間の更新
-                d[x.to] = d[v] + x.time;
-
-                //進んだ先の頂点x.toの情報をpushする
-                que.push(pair<long long, long long>(d[x.to], x.to));
-            }
-        }
+        return;
     }
 
-    return;
-}
+    //頂点sから各頂点への最短時間の探索(ダイクストラ法)
+    void Dijkstra(Ty s) {
+        d[s] = 0;               //頂点s(始点)までの最短時間を0に初期化する
+
+        std::priority_queue
+        <std::pair<Ty, Ty>,                 //要素の型
+         std::vector<std::pair<Ty, Ty>>,    //要素のコンテナ
+         std::greater<std::pair<Ty, Ty>>>   //要素の比較関数
+        que;
+
+        que.push(std::pair<Ty, Ty>(d[s], s));  //(time, to)の形をしているので注意
+
+        while(!que.empty()){
+            std::pair<Ty, Ty> p = que.top();
+            que.pop();
+
+            Ty v = p.second;
+
+            for(auto &x : G[v]){
+                if(d[x.to] > d[v] + x.time){    //(*1)参照
+
+                    //頂点vから向かって頂点x.toに着く最短時間の更新
+                    d[x.to] = d[v] + x.time;
+
+                    //進んだ先の頂点x.toの情報をpushする
+                    que.push(std::pair<Ty, Ty>(d[x.to], x.to));
+                }
+            }
+        }
+
+        return;
+    }
+};
 
 /*----------Dijkstra法の実装ここまで----------*/
 
+#include <iostream>
+
+using ll = long long;
+
+//最大値更新関数
+template<typename T1, typename T2>
+inline bool chmax(T1 &a, T2 b)
+{ return a < b && (a = b, true); }
 
 int main() {
-    long long n, m, t;          //n:町(頂点)の数, m:道(辺)の数, t:上限時間
-    cin >> n >> m >> t;
-    long long ans = 0;          //所持金
+    //n:町(頂点)の数, m:道(辺)の数, t:上限時間
+    ll n, m, t;
+    std::cin >> n >> m >> t;
 
-    vector<long long> a(n);     //それぞれの町の所持金に加算される金額
-    for(int i = 0; i < n; ++i){
-        cin >> a[i];
+    //所持金
+    ll ans = 0;
+
+    //それぞれの町の所持金に加算される金額
+    std::vector<ll> a(n);
+    for(int i = 0; i < n; ++i) {
+        std::cin >> a[i];
     }
 
-    graph G1(n);                //順方向グラフのインスタンス化
-    graph G2(n);                //逆方向グラフのインスタンス化
+    Graph<ll> G1(n);            //順方向グラフのインスタンス化
+    Graph<ll> G2(n);            //逆方向グラフのインスタンス化
 
-    for(int i = 0; i < m; ++i){
-        long long a, b, c;      //a番の町からb番の町へ移動するのにc分かかる
-        cin >> a >> b >> c;
+    for(int i = 0; i < m; ++i) {
+        ll a, b, c;             //a番の町からb番の町へ移動するのにc分かかる
+        std::cin >> a >> b >> c;
         --a; --b;               //配列の添え字は0から始まるのでデクリメントする
 
-        G1.add_edge(a, b, c);   //順方向グラフの辺を張る
-        G2.add_edge(b, a, c);   //逆方向グラフの辺を張る
+        G1.AddEdge(a, b, c);    //順方向グラフの辺を張る
+        G2.AddEdge(b, a, c);    //逆方向グラフの辺を張る
     }
 
-    G1.dijkstra(0);             //0から出発した時の最短時間の探索(順方向)
-    G2.dijkstra(0);             //0から出発した時の最短時間の探索(逆方向)
+    G1.Dijkstra(0);     //0から出発した時の最短時間の探索(順方向)
+    G2.Dijkstra(0);     //0から出発した時の最短時間の探索(逆方向)
 
-    for(int i = 0; i < n; ++i){
-        if(t < G1.d[i] + G2.d[i]) continue; //(*2)参照
+    for(int i = 0; i < n; ++i) {
+        //(*2)参照
+        if(t < G1.d[i] + G2.d[i]) continue;
 
-        long long money = a[i] * (t - (G1.d[i] + G2.d[i])); //(*3)参照
+        //(*3)参照
+        ll money = a[i] * (t - (G1.d[i] + G2.d[i]));
 
-        chmax(ans, money);      //所持金の最大値の更新
+        //所持金の最大値の更新
+        chmax(ans, money);
     }
 
-    cout << ans << '\n';        //所持金の最大値(答え)の出力
+    //所持金の最大値(答え)の出力
+    std::cout << ans << '\n';
 
-return 0;
+    return 0;
 }
 
 /*
