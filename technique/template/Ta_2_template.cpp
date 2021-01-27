@@ -47,7 +47,7 @@ void print_value2(string name, Type value){
 
 void print_value3(string name, auto value){
   int num = 0;
-  fe(i, value)co name << "[" << nume++ "]:" << i en;
+  fe(i, value)co name << "[" << num++ << "]:" << i en;
 }
 #define pri3(value) print_value3(sn(value))
 //------------main------------
