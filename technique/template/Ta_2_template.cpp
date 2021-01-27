@@ -14,6 +14,7 @@ using namespace std;
 //------------型マクロ定義------------
 typedef long l;
 typedef long long ll;
+typedef long double ld;
 #define INIF 1e9;
 #define MOD 1000000007;
 #define ALL(v) (v).begin(), (v).end()
