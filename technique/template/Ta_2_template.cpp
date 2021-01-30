@@ -1,6 +1,6 @@
 //------------ヘッダーインクルード------------
 #include <stdio.h>
-#incldue <cmath>
+#include <cmath>
 #include <stdarg.h>
 #include <iostream>
 #include <vector>
