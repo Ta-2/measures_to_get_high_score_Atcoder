@@ -37,15 +37,15 @@ typedef long double ld;
 #define co cout<<
 #define en <<endl
 #define in cin>>
-#define in_v(type, d_v) type d_v;\
-                        in d_v;
-#define in_l(type, d_l, d_v)  v(type) d_l(d_v);\
-                              rep(d_i, d_v) in(d_l[d_i]);
 #define br co "" en
 #define pr(value) ","<<#value<<": "<<value
 #define sn(value) #value,value
 
-#define vl(d_v, l_type, d_l) \
+#define in_v(type, d_v) type d_v;\
+                        in d_v;
+#define in_l(type, d_l, d_v)  v(type) d_l(d_v);\
+                              rep(d_i, d_v) in(d_l[d_i]);
+#define in_vl(d_v, l_type, d_l) \
                   in_v(int, d_v);\
                   in_l(l_type, d_l, d_v);
 
