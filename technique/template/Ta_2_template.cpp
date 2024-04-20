@@ -43,8 +43,8 @@ typedef long double ld;
 
 #define in_v(type, d_v) type d_v;\
                         in d_v;
-#define in_l(type, d_l, d_v)  v(type) d_l(d_v);\
-                              rep(d_i, d_v) in(d_l[d_i]);
+#define in_l(type, d_l, d_v)  v(type) d_l((d_v)+1);\
+                              rep(d_i, (d_v)+1) in(d_l[d_i]);
 #define in_vl(d_v, l_type, d_l) \
                   in_v(int, d_v);\
                   in_l(l_type, d_l, d_v);
