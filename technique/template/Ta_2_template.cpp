@@ -27,7 +27,7 @@ typedef long double ld;
 #define vini(n, m) ((n), (m))
 //------------forマクロ定義------------
 //#define rep(i, n) for(int i = 0; (i) < (n); (i)++)
-#define rep(i, n) for(int (i) = 0; (i) < (n); (i)++)
+#define rep(i, n) for(int i = 0; i < n; i++)
 //#define rep2(i, m, n) for(int i = (m); (i) < (n); i++)
 #define rep2(i, m, n) for(int (i) = (m); (i) < (n); i++)
 //#define repr(i, n) for(int i = n; i >= 0; i--)
@@ -37,15 +37,17 @@ typedef long double ld;
 #define co cout<<
 #define en <<endl
 #define in cin>>
+#define in_v(type, d_v) type d_v;\
+                        in d_v;
+#define in_l(type, d_l, d_v)  v(type) d_l(d_v);\
+                              rep(d_i, d_v) in(d_l[d_i]);
 #define br co "" en
 #define pr(value) ","<<#value<<": "<<value
 #define sn(value) #value,value
 
-#define vl(val, l, type) \
-                  int (val);\
-                  in (val);\
-                  v(type) (l)( (val) );\
-                  rep(d_i, val) in( (l)[d_i] );
+#define vl(d_v, l_type, d_l) \
+                  in_v(int, d_v);\
+                  in_l(l_type, d_l, d_v);
 
 //------------表示マクロ定義------------
 template<class Type>
