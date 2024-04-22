@@ -27,12 +27,12 @@ typedef long double ld;
 #define vini(n, m) ((n), (m))
 //------------forマクロ定義------------
 //#define rep(i, n) for(int i = 0; (i) < (n); (i)++)
-#define rep(i, n) for(int i = 0; i < n; i++)
+#define rep(d_i, d_n) for(int d_i = 0; d_i < d_n; d_i++)
 //#define rep2(i, m, n) for(int i = (m); (i) < (n); i++)
-#define rep2(i, m, n) for(int (i) = (m); (i) < (n); i++)
+#define rep2(d_i, d_m, d_n) for(int (d_i) = (d_m); (d_i) < (d_n); d_i++)
 //#define repr(i, n) for(int i = n; i >= 0; i--)
-#define repr(i, n) for(int (i) = (n); (i) >= 0; (i)--)
-#define fe(i, STL) for(auto i: (STL))
+#define repr(d_i, d_n) for(int (d_i) = (d_n); (d_i) >= 0; (d_i)--)
+#define fe(d_i, STL) for(auto d_i: (STL))
 //------------ioマクロ定義------------
 #define co cout<<
 #define en <<endl
@@ -43,11 +43,11 @@ typedef long double ld;
 
 #define in_v(type, d_v) type d_v;\
                         in d_v;
-#define in_l(type, d_l, d_v)  v(type) d_l((d_v)+1);\
-                              rep(d_i, (d_v)+1) in(d_l[d_i]);
-#define in_vl(d_v, l_type, d_l) \
-                  in_v(int, d_v);\
-                  in_l(l_type, d_l, d_v);
+#define in_l(type, d_l, d_v)  v(type) d_l( d_v );\
+                              rep(d_i, d_v) in(d_l[d_i]);
+#define in_vl(type_v, d_v, type_l, d_l) \
+                  in_v(type_v, d_v);\
+                  in_l(type_l, d_l, d_v);
 
 //------------表示マクロ定義------------
 template<class Type>
