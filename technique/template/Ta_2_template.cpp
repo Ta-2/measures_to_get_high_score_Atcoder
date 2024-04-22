@@ -87,7 +87,7 @@ int main(){
   rep2(i, 5, 10)co i en;
   repr(i, 5)co i en;
   
-  vl(iter, arr, int);
+  in_vl(iter, arr, int);
   p(iter);
   p_l(v(int), arr);
   
